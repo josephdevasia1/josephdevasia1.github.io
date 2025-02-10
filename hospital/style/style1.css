@@ -1,0 +1,79 @@
+/* Style for the navigation bar */
+.navbar {
+    position: fixed;
+    width: 100%;
+    background-color: blue;
+    color: white;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+/* Style for the main content */
+.main {
+    padding-top: 130px;
+    text-align: center;
+    
+}
+
+/* Style for the heading inside the main content */
+.main h1 {
+    color: blue;
+    font-size: 2.5em;
+}
+
+/* Style for the scrolling text container */
+.scroll {
+    overflow: hidden;
+    background-color: #f4f4f4; /* Background color for contrast */
+    max-height: 10%;
+}
+
+/* Style for the category list */
+.category-list {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-around; /* Distribute categories evenly */
+}
+
+/* Style for each category */
+.category h1{
+    text-align: center;
+}
+
+/* Style for the doctor list */
+.doctor-list {
+    list-style-type: none;
+    padding: 0;
+   
+}
+
+li a{
+    color:blue;
+    text-align: left;
+
+}
+
+/* Style for doctor list items */
+.doctor-list li {
+    margin: 5px 0;
+}
+
+li h1{
+    font-size: 3em;
+    color: red;
+}
+
+.doctor-list{
+    font-size: 2.3em;
+}
+
+.navbar-bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: blue;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
