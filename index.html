@@ -1,489 +1,1621 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Joseph Devasia</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.webp">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joseph Devasia | Cybersecurity Portfolio</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23080c10'/%3E%3Cpath d='M32 6 L54 14 L54 34 C54 48 44 57 32 62 C20 57 10 48 10 34 L10 14 Z' fill='none' stroke='%2300ff41' stroke-width='2'/%3E%3Ctext x='32' y='40' font-family='Arial Black,sans-serif' font-weight='900' font-size='18' fill='%2300ff41' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:  #00ff41;
+      --cyan:   #00d4ff;
+      --purple: #7b2fff;
+      --bg:     #080c10;
+      --bg2:    #0d1117;
+      --bg3:    #111827;
+      --card:   rgba(255,255,255,0.04);
+      --border: rgba(0,255,65,0.18);
+      --text:   #c9d1d9;
+      --muted:  #586069;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: var(--green); color: #000; }
 
-    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
-    <link rel="stylesheet" href="css/animate.css">
-    
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
-    <link rel="stylesheet" href="css/magnific-popup.css">
+    /* ─── Scrollbar ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
 
-    <link rel="stylesheet" href="css/aos.css">
+    /* ─── Matrix Canvas ─────────────────────────────────────────── */
+    #matrix-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+      opacity: 0.06;
+    }
 
-    <link rel="stylesheet" href="css/ionicons.min.css">
-    
-    <link rel="stylesheet" href="css/flaticon.css">
-    <link rel="stylesheet" href="css/icomoon.css">
-    <link rel="stylesheet" href="css/style.css">
-  </head>
-  <body data-spy="scroll" data-target=".site-navbar-target" data-offset="300">
-	  
-	  
-    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar ftco-navbar-light site-navbar-target" id="ftco-navbar">
-	    <div class="container">
-	      <a class="navbar-brand" href="index.html">Joseph</a>
-	      <button class="navbar-toggler js-fh5co-nav-toggle fh5co-nav-toggle" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-	        <span class="oi oi-menu"></span> Menu
-	      </button>
+    /* ─── Navigation ────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,12,16,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: var(--green);
+      letter-spacing: 2px;
+    }
+    .nav-logo span { color: var(--cyan); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      transition: color 0.25s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--green);
+      transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-status {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; color: var(--green);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
 
-	      <div class="collapse navbar-collapse" id="ftco-nav">
-	        <ul class="navbar-nav nav ml-auto">
-	          <li class="nav-item"><a href="#home-section" class="nav-link"><span>Home</span></a></li>
-	          <li class="nav-item"><a href="#about-section" class="nav-link"><span>About</span></a></li>
-	          <li class="nav-item"><a href="#resume-section" class="nav-link"><span>Resume</span></a></li>
-	          <li class="nav-item"><a href="#services-section" class="nav-link"><span>Services</span></a></li>
-	          <li class="nav-item"><a href="#skills-section" class="nav-link"><span>Skills</span></a></li>
-	          <li class="nav-item"><a href="#contact-section" class="nav-link"><span>Contact</span></a></li>
-	        </ul>
-	      </div>
-	    </div>
-	  </nav>
-	  <section id="home-section" class="hero">
-		  <div class="home-slider  owl-carousel">
-	      <div class="slider-item ">
-	      	<div class="overlay"></div>
-	        <div class="container">
-	          <div class="row d-md-flex no-gutters slider-text align-items-end justify-content-end" data-scrollax-parent="true">
-	          	<div class="one-third js-fullheight order-md-last img" style="background-image:url(images/bg_1.png);">
-	          		<div class="overlay"></div>
-	          	</div>
-		          <div class="one-forth d-flex  align-items-center ftco-animate" data-scrollax=" properties: { translateY: '70%' }">
-		          	<div class="text">
-		          		<span class="subheading">Hello!</span>
-			            <h1 class="mb-4 mt-3">I'm <span>Joseph Devasia</span></h1>
-			            <h2 class="mb-4">A Web Designer and CyberSecurity Enthusiast</h2>
-			            <p><a href="#" class="btn btn-primary py-3 px-4">Hire me</a> <a href="#" class="btn btn-white btn-outline-white py-3 px-4">My works</a></p>
-		            </div>
-		          </div>
-	        	</div>
-	        </div>
-	      </div>
+    /* ─── Hero ──────────────────────────────────────────────────── */
+    #hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 6rem 2rem 4rem;
+      overflow: hidden;
+    }
+    .hero-bg-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,255,65,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .hero-content { text-align: center; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      margin-bottom: 2rem;
+      background: rgba(0,255,65,0.05);
+    }
+    .hero-badge-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    h1.hero-name {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .name-line1 { color: #fff; display: block; }
+    .name-line2 { color: var(--green); display: block; }
+    /* Glitch */
+    .glitch {
+      position: relative;
+      animation: glitch-skew 3s infinite linear alternate-reverse;
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .glitch::before {
+      color: var(--cyan);
+      animation: glitch-a 2.5s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+      transform: translate(-4px, 0);
+    }
+    .glitch::after {
+      color: var(--purple);
+      animation: glitch-b 2.5s infinite;
+      clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%);
+      transform: translate(4px, 0);
+    }
+    .hero-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--cyan);
+      margin: 1.2rem 0 0.6rem;
+      min-height: 1.8rem;
+    }
+    .cursor { display: inline-block; animation: blink 0.8s infinite; color: var(--green); }
+    .hero-sub {
+      max-width: 600px; margin: 1.2rem auto 2.5rem;
+      line-height: 1.7; color: var(--muted); font-size: 0.95rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.25s;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--green); color: #000;
+      border-color: var(--green);
+    }
+    .btn-primary:hover { background: transparent; color: var(--green); }
+    .btn-outline {
+      background: transparent; color: var(--cyan);
+      border-color: var(--cyan);
+    }
+    .btn-outline:hover { background: rgba(0,212,255,0.1); }
+    .hero-stats {
+      display: flex; gap: 3rem; justify-content: center;
+      margin-top: 3.5rem; flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem; font-weight: 700;
+      color: var(--green);
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 1px; }
 
-	      <div class="slider-item">
-	      	<div class="overlay"></div>
-	        <div class="container">
-	          <div class="row d-flex no-gutters slider-text align-items-end justify-content-end" data-scrollax-parent="true">
-	          	<div class="one-third js-fullheight order-md-last img" style="background-image:url(images/bg_2.png);">
-	          		<div class="overlay"></div>
-	          	</div>
-		          <div class="one-forth d-flex align-items-center ftco-animate" data-scrollax=" properties: { translateY: '70%' }">
-		          	<div class="text">
-		          		<span class="subheading">Hello!</span>
-			            <h1 class="mb-4 mt-3">I'm a <span>Software Engineer</span> based in Kerala</h1>
-			            <p><a href="#" class="btn btn-primary py-3 px-4">Hire me</a> <a href="#" class="btn btn-white btn-outline-white py-3 px-4">My works</a></p>
-		            </div>
-		          </div>
-	        	</div>
-	        </div>
-	      </div>
-	    </div>
-    </section>
+    /* Floating Shield SVG */
+    .hero-shield {
+      position: absolute; right: 5%; top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.12;
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero-lock {
+      position: absolute; left: 5%; top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.10;
+      animation: float 8s ease-in-out infinite reverse;
+      pointer-events: none;
+    }
 
-    <section class="ftco-about img ftco-section ftco-no-pb" id="about-section">
-    	<div class="container">
-    		<div class="row d-flex">
-    			<div class="col-md-6 col-lg-5 d-flex">
-    				<div class="img-about img d-flex align-items-stretch">
-    					<div class="overlay"></div>
-	    				<div class="img d-flex align-self-stretch align-items-center" style="background-image:url(images/bg_1.png);">
-	    				</div>
-    				</div>
-    			</div>
-    			<div class="col-md-6 col-lg-7 pl-lg-5 pb-5">
-    				<div class="row justify-content-start pb-3">
-		          <div class="col-md-12 heading-section ftco-animate">
-		          	<h1 class="big">About</h1>
-		            <h2 class="mb-4">About Me</h2>
-		            <p>Simplicity is the ultimate sophistication</p>
-		            <ul class="about-info mt-4 px-md-0 px-2">
-		            	<li class="d-flex"><span>Name:</span> <span>Joseph Devasia</span></li>
-		            	<li class="d-flex"><span>Date of birth:</span> <span>July 24 2001</span></li>
-		            	<li class="d-flex"><span>Address:</span> <span>Denton, Texas, United States of America</span></li>
-		            	<li class="d-flex"><span>Zip code:</span> <span>689573</span></li>
-		            	<li class="d-flex"><span>Email:</span> <span>email@josephdevasia.info</span></li>
-		            	<li class="d-flex"><span>Phone: </span> <span>9403128918</span></li>
-		            </ul>
-		          </div>
-		        </div>
-	          <div class="counter-wrap ftco-animate d-flex mt-md-3">
-              <div class="text">
-              	<p class="mb-4">
-	                <span class="number" data-number="5">0</span>
-	                <span>Project complete</span>
-                </p>
-                <p><a href="#" class="btn btn-primary py-3 px-3">Download CV</a></p>
-              </div>
-	          </div>
-	        </div>
+    /* ─── Section Base ──────────────────────────────────────────── */
+    section { position: relative; z-index: 1; padding: 6rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 4rem; }
+    .section-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      color: #fff;
+    }
+    .section-line {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      margin: 1rem auto 0;
+      border-radius: 2px;
+    }
+
+    /* ─── About ─────────────────────────────────────────────────── */
+    #about { background: var(--bg2); }
+    .about-grid { display: flex; flex-direction: column; gap: 2.5rem; }
+    .terminal-card { max-width: 100%; }
+    .about-text p { line-height: 1.8; color: var(--text); margin-bottom: 1rem; }
+    .about-text strong { color: var(--green); }
+    .terminal-card {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: text;
+      transition: border-color 0.3s;
+    }
+    .terminal-card:focus-within { border-color: var(--green); }
+    .terminal-bar {
+      background: #161b22;
+      padding: 0.6rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .t-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .t-red { background: #ff5f57; }
+    .t-yellow { background: #ffbd2e; }
+    .t-green-dot { background: #28ca41; }
+    .terminal-title { margin-left: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+    .terminal-title em { color: var(--green); font-style: normal; }
+    .terminal-output {
+      padding: 1.2rem 1.5rem 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.85;
+      max-height: 340px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    .terminal-output::-webkit-scrollbar { width: 4px; }
+    .terminal-output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .terminal-input-row {
+      display: flex; align-items: center; gap: 0;
+      padding: 0.4rem 1.5rem 1.2rem;
+      position: relative;
+    }
+    .term-ps1 { white-space: nowrap; }
+    .term-input-wrap {
+      position: relative;
+      flex: 1;
+      margin-left: 0.4rem;
+      display: flex; align-items: center;
+    }
+    #term-display {
+      color: #fff;
+      white-space: pre;
+      pointer-events: none;
+    }
+    .term-caret {
+      display: inline-block;
+      width: 8px; height: 1.1em;
+      background: var(--green);
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: blink 0.8s step-end infinite;
+    }
+    #term-input {
+      position: absolute; left: 0; top: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      background: transparent;
+      border: none; outline: none;
+      color: transparent;
+      caret-color: transparent;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+    }
+    .t-prompt { color: var(--green); }
+    .t-cmd { color: var(--cyan); }
+    .t-out { color: var(--text); }
+    .t-dim { color: var(--muted); }
+    .t-val { color: #e3b341; }
+    .t-err { color: #ff5f57; }
+    .t-hi  { color: var(--green); }
+    .t-blue { color: #79c0ff; }
+    .t-sec { color: var(--cyan); }
+    .term-hint {
+      font-size: 0.72rem; color: var(--muted);
+      padding: 0.2rem 1.5rem 0.6rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* ─── Skills ────────────────────────────────────────────────── */
+    #skills { background: var(--bg); }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .skill-category {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .skill-category:hover {
+      border-color: var(--green);
+      transform: translateY(-4px);
+    }
+    .skill-cat-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+    .skill-cat-icon { font-size: 1.4rem; }
+    .skill-cat-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 1px;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 3px;
+      background: rgba(0,255,65,0.08);
+      border: 1px solid rgba(0,255,65,0.2);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .skill-tag:hover { background: rgba(0,255,65,0.2); color: var(--green); }
+    .skill-tag.cyan {
+      background: rgba(0,212,255,0.08);
+      border-color: rgba(0,212,255,0.2);
+    }
+    .skill-tag.cyan:hover { background: rgba(0,212,255,0.2); color: var(--cyan); }
+    .skill-tag.purple {
+      background: rgba(123,47,255,0.08);
+      border-color: rgba(123,47,255,0.2);
+    }
+    .skill-tag.purple:hover { background: rgba(123,47,255,0.2); color: #b478ff; }
+
+    /* ─── Experience ────────────────────────────────────────────── */
+    #experience { background: var(--bg2); }
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--green), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3rem;
+      padding-left: 2rem;
+    }
+    .timeline-dot {
+      position: absolute; left: -2.4rem; top: 0.35rem;
+      width: 16px; height: 16px;
+      background: var(--bg2);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .timeline-dot::after {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+    .exp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.75rem;
+      transition: border-color 0.3s;
+    }
+    .exp-card:hover { border-color: var(--green); }
+    .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .exp-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem; font-weight: 700; color: #fff;
+    }
+    .exp-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      background: rgba(0,255,65,0.1);
+      border: 1px solid rgba(0,255,65,0.3);
+      color: var(--green);
+    }
+    .exp-company { color: var(--cyan); font-size: 0.9rem; margin-bottom: 0.4rem; }
+    .exp-company-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+    .unt-logo {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px;
+      background: #00853E; flex-shrink: 0;
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: 0.6rem; color: #fff; letter-spacing: 0.5px;
+      line-height: 1; text-align: center;
+      box-shadow: 0 0 10px rgba(0,133,62,0.4);
+    }
+    .exp-badge.part-time {
+      background: rgba(227,179,65,0.1);
+      border-color: rgba(227,179,65,0.35);
+      color: #e3b341;
+    }
+    .exp-badge.current {
+      background: rgba(0,133,62,0.15);
+      border-color: rgba(0,133,62,0.45);
+      color: #00d46a;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .exp-badge.current::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #00d46a;
+      animation: pulse 2s infinite;
+    }
+    .exp-date {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .exp-bullets { list-style: none; }
+    .exp-bullets li {
+      position: relative; padding-left: 1.2rem;
+      font-size: 0.9rem; line-height: 1.7; color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+    .exp-bullets li::before {
+      content: '▹';
+      position: absolute; left: 0;
+      color: var(--green);
+    }
+    .exp-bullets strong { color: var(--green); }
+
+    /* ─── Projects ──────────────────────────────────────────────── */
+    #projects { background: var(--bg); }
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.75rem;
+      display: flex; flex-direction: column;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .project-card:hover::before { transform: scaleX(1); }
+    .project-card:hover {
+      border-color: rgba(0,255,65,0.4);
+      transform: translateY(-6px);
+    }
+    .project-icon {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .project-icon.green { background: rgba(0,255,65,0.1); }
+    .project-icon.cyan { background: rgba(0,212,255,0.1); }
+    .project-icon.purple { background: rgba(123,47,255,0.1); }
+    .project-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem; font-weight: 700;
+      color: #fff; margin-bottom: 0.75rem; line-height: 1.4;
+    }
+    .project-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; flex: 1; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.2rem; }
+    .project-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      background: rgba(0,255,65,0.06);
+      border: 1px solid rgba(0,255,65,0.15);
+      color: var(--green);
+    }
+
+    /* ─── Certifications ────────────────────────────────────────── */
+    #certifications { background: var(--bg2); }
+    .certs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; }
+    .cert-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.75rem;
+      display: flex; gap: 1.2rem; align-items: flex-start;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .cert-card:hover { border-color: var(--cyan); transform: translateY(-4px); }
+    .cert-shield {
+      flex-shrink: 0;
+      width: 52px; height: 52px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .cert-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem; font-weight: 700;
+      color: #fff; margin-bottom: 0.3rem; line-height: 1.4;
+    }
+    .cert-issuer { font-size: 0.8rem; color: var(--cyan); margin-bottom: 0.5rem; }
+    .cert-verify {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; color: var(--green);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .cert-verify:hover { color: var(--cyan); }
+
+    /* ─── Contact ────────────────────────────────────────────────── */
+    #contact { background: var(--bg); }
+    .contact-wrapper {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+    }
+    .contact-info h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem; color: #fff; margin-bottom: 1.5rem;
+    }
+    .contact-links { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-link {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.2rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: border-color 0.3s, transform 0.2s;
+    }
+    .contact-link:hover { border-color: var(--green); transform: translateX(6px); }
+    .contact-link-icon { font-size: 1.2rem; }
+    .contact-link-label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.15rem; font-family: 'Share Tech Mono', monospace; }
+    .contact-link-val { font-size: 0.88rem; color: var(--text); }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--green); letter-spacing: 1px; }
+    .form-input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .form-input:focus { border-color: var(--green); }
+    .form-input::placeholder { color: var(--muted); }
+    textarea.form-input { resize: vertical; min-height: 130px; }
+    .form-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      padding: 0.85rem;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: opacity 0.3s, transform 0.2s;
+    }
+    .form-submit:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    footer span { color: var(--green); }
+
+    /* ─── Network SVG bg (About) ─────────────────────────────────── */
+    .network-nodes {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 40%;
+      pointer-events: none; opacity: 0.15;
+    }
+
+    /* ─── Animations ─────────────────────────────────────────────── */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,65,0.5); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0,255,65,0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(-50%) translateX(0); }
+      50% { transform: translateY(-52%) translateX(10px); }
+    }
+    @keyframes glitch-skew {
+      0%  { transform: skew(0deg); }
+      20% { transform: skew(0.5deg); }
+      40% { transform: skew(-0.5deg); }
+      100%{ transform: skew(0deg); }
+    }
+    @keyframes glitch-a {
+      0%, 90%, 100% { transform: translate(-4px,0); opacity: 0; }
+      92%  { transform: translate(-4px, -2px); clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); opacity: 0.7; }
+      95%  { transform: translate(4px, 2px); clip-path: polygon(0 55%, 100% 55%, 100% 70%, 0 70%); opacity: 0.7; }
+    }
+    @keyframes glitch-b {
+      0%, 90%, 100% { transform: translate(4px,0); opacity: 0; }
+      93%  { transform: translate(4px, 2px); clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); opacity: 0.7; }
+      96%  { transform: translate(-4px, -2px); clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); opacity: 0.7; }
+    }
+    @keyframes scanline {
+      0% { top: -5%; }
+      100% { top: 105%; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.7s, transform 0.7s; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .contact-wrapper { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-shield, .hero-lock { display: none; }
+      .hero-stats { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Matrix Rain Canvas -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- Navigation -->
+<nav id="navbar">
+  <div class="nav-logo">JD<span>.</span>SEC</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certifications">Certifications</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    OPEN TO WORK
+  </div>
+</nav>
+
+<!-- ─── HERO ─────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+
+  <!-- Floating shield SVG -->
+  <svg class="hero-shield" width="300" height="340" viewBox="0 0 300 340" fill="none">
+    <path d="M150 10 L280 60 L280 160 C280 240 220 300 150 330 C80 300 20 240 20 160 L20 60 Z"
+          fill="none" stroke="#00ff41" stroke-width="2"/>
+    <path d="M150 40 L255 80 L255 160 C255 225 205 275 150 300 C95 275 45 225 45 160 L45 80 Z"
+          fill="rgba(0,255,65,0.05)" stroke="#00ff41" stroke-width="1" stroke-dasharray="6 4"/>
+    <!-- Lock icon inside shield -->
+    <rect x="125" y="150" width="50" height="40" rx="5" fill="none" stroke="#00ff41" stroke-width="2"/>
+    <path d="M135 150 L135 135 C135 120 165 120 165 135 L165 150" fill="none" stroke="#00ff41" stroke-width="2"/>
+    <circle cx="150" cy="170" r="5" fill="#00ff41"/>
+    <line x1="150" y1="175" x2="150" y2="183" stroke="#00ff41" stroke-width="2"/>
+  </svg>
+
+  <!-- Floating circuit/lock left -->
+  <svg class="hero-lock" width="200" height="240" viewBox="0 0 200 240">
+    <rect x="10" y="10" width="180" height="220" rx="10" fill="none" stroke="#00d4ff" stroke-width="1" stroke-dasharray="8 4"/>
+    <circle cx="100" cy="90" r="30" fill="none" stroke="#00d4ff" stroke-width="2"/>
+    <rect x="70" y="110" width="60" height="50" rx="5" fill="rgba(0,212,255,0.06)" stroke="#00d4ff" stroke-width="2"/>
+    <circle cx="100" cy="132" r="6" fill="#00d4ff" opacity="0.8"/>
+    <line x1="100" y1="138" x2="100" y2="150" stroke="#00d4ff" stroke-width="2"/>
+    <!-- circuit lines -->
+    <line x1="10" y1="60" x2="60" y2="60" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+    <line x1="140" y1="60" x2="190" y2="60" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+    <line x1="10" y1="190" x2="60" y2="190" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+    <line x1="140" y1="190" x2="190" y2="190" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+    <circle cx="60" cy="60" r="3" fill="#00d4ff" opacity="0.5"/>
+    <circle cx="140" cy="60" r="3" fill="#00d4ff" opacity="0.5"/>
+    <circle cx="60" cy="190" r="3" fill="#00d4ff" opacity="0.5"/>
+    <circle cx="140" cy="190" r="3" fill="#00d4ff" opacity="0.5"/>
+  </svg>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      MS Cybersecurity @ University of North Texas
+    </div>
+    <h1 class="hero-name">
+      <span class="name-line1">Joseph</span>
+      <span class="name-line2 glitch" data-text="Devasia">Devasia</span>
+    </h1>
+    <div class="hero-title" id="typed-title"><span class="cursor">|</span></div>
+    <p class="hero-sub">
+      Cybersecurity graduate student with <strong style="color:var(--green)">2+ years</strong> of SOC and security engineering experience.
+      Specializing in threat detection, incident response, and blue team operations.
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn btn-primary">&#9993; Get In Touch</a>
+      <a href="#projects" class="btn btn-outline">&#128196; View Projects</a>
+      <a href="https://github.com/josephdevasia1" target="_blank" class="btn btn-outline" style="border-color:var(--purple);color:var(--purple)">&#129300; GitHub</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" data-target="50">0</div>
+        <div class="stat-label">THREATS IDENTIFIED</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-target="500">0</div>
+        <div class="stat-label">LOGS ANALYZED / WEEK</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-target="20">0</div>
+        <div class="stat-label">% MTTR REDUCTION</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-target="3">0</div>
+        <div class="stat-label">BREACHES CONTAINED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ABOUT ─────────────────────────────────────────────────────── -->
+<section id="about">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// whoami</div>
+      <h2 class="section-title">About Me</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-grid">
+      <div class="terminal-card fade-in" id="terminal" onclick="document.getElementById('term-input').focus()">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div>
+          <div class="t-dot t-yellow"></div>
+          <div class="t-dot t-green-dot"></div>
+          <span class="terminal-title">jdevasia@unt: ~ &nbsp;<em>— interactive</em></span>
         </div>
-    	</div>
-    </section>
-
-    <section class="ftco-section ftco-no-pb" id="resume-section">
-    	<div class="container">
-    		<div class="row justify-content-center pb-5">
-          <div class="col-md-10 heading-section text-center ftco-animate">
-          	<h1 class="big big-2">Resume</h1>
-            <h2 class="mb-4">Resume</h2>
-            <p>True mastery lies in making thing looks simple</p>
+        <div class="terminal-output" id="term-output"></div>
+        <div class="terminal-input-row">
+          <span class="term-ps1">
+            <span class="t-prompt">jdevasia@unt</span><span class="t-dim">:</span><span class="t-prompt">~</span><span class="t-dim">$</span>
+          </span>
+          <div class="term-input-wrap">
+            <span id="term-display"></span><span class="term-caret" id="term-caret"></span>
+            <input id="term-input" type="text" autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false" aria-label="terminal input" />
           </div>
         </div>
-    		<div class="row">
-    			<div class="col-md-6">
-    			    <div class="resume-wrap ftco-animate">
-    					<span class="date">from 2024</span>
-    					<h2>Dev/Charm -Develop like Charm</h2>
-    					<span class="position"> CEO & Co-Founder</span>
-    					<p class="mt-4"></p>
-    				</div>
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">2019-2023</span>
-    					<h2>Bachelor of Technology in Computer Science and Engineering</h2>
-    					<span class="position">KTU, Kerala</span>
-    					<p class="mt-4"></p>
-    				</div>
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">Nov 2023 - Jul 2024</span>
-    					<h2>Associate Customer Support</h2>
-    					<span class="position">Sutherland Global</span>
-    					<p class="mt-4"></p>
-    				</div>
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">Sept 2024 - Oct 2024</span>
-    					<h2>Regional Trainer</h2>
-    					<span class="position">Flipkart India</span>
-    					<p class="mt-4"></p>
-    				</div>
-    			</div>
-
-    			<!-- <div class="col-md-6">
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">2014-2015</span>
-    					<h2>Art &amp; Creative Director</h2>
-    					<span class="position">Cambridge University</span>
-    					<p class="mt-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-    				</div>
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">2014-2015</span>
-    					<h2>Wordpress Developer</h2>
-    					<span class="position">Cambridge University</span>
-    					<p class="mt-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-    				</div>
-    				<div class="resume-wrap ftco-animate">
-    					<span class="date">2017-2018</span>
-    					<h2>UI/UX Designer</h2>
-    					<span class="position">Cambridge University</span>
-    					<p class="mt-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-    				</div>
-    			</div> -->
-    		</div>
-    		<div class="row justify-content-center mt-5">
-    			<div class="col-md-6 text-center ftco-animate">
-    				<p><a href="#" class="btn btn-primary py-4 px-5">Download CV</a></p>
-    			</div>
-    		</div>
-    	</div>
-    </section>
-
-    <section class="ftco-section" id="services-section">
-    	<div class="container">
-    		<div class="row justify-content-center py-5 mt-5">
-          <div class="col-md-12 heading-section text-center ftco-animate">
-          	<h1 class="big big-2">Services</h1>
-            <h2 class="mb-4">Services</h2>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
-          </div>
+        <div class="term-hint">Type <span class="t-hi">help</span> to see available commands &nbsp;|&nbsp; ↑↓ history &nbsp;|&nbsp; Tab to autocomplete</div>
+      </div>
+      <div class="about-text fade-in">
+        <p>
+          I'm a <strong>cybersecurity graduate student</strong> at the University of North Texas (GPA 3.5/4.0),
+          with over two years of hands-on experience in security operations, incident response, and threat intelligence.
+        </p>
+        <p>
+          At <strong>Edstem Technologies</strong>, I progressed from intern to Cybersecurity Engineer, monitoring
+          SIEM dashboards, triaging hundreds of alerts, and containing real-world breaches — all within hours.
+        </p>
+        <p>
+          I hold a <strong>Certified Active Directory Red Team Specialist (AD-RTS)</strong> credential and a
+          Coursera-verified certificate in Ethical Hacking and Network Security from the University of Colorado Boulder.
+        </p>
+        <p>
+          Outside of security, I build full-stack applications and privacy-preserving systems using
+          <strong>Zero-Knowledge Proofs</strong>, <strong>Blockchain</strong>, and modern web technologies.
+        </p>
+        <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+          <a href="https://linkedin.com/in/josephdevasia/" target="_blank" class="btn btn-outline" style="font-size:0.78rem;padding:0.5rem 1.2rem">LinkedIn</a>
+          <a href="https://github.com/josephdevasia1" target="_blank" class="btn btn-outline" style="font-size:0.78rem;padding:0.5rem 1.2rem;border-color:var(--purple);color:var(--purple)">GitHub</a>
+          <a href="mailto:joseph.devasia1@outlook.com" class="btn btn-primary" style="font-size:0.78rem;padding:0.5rem 1.2rem">Email Me</a>
         </div>
-    		<div class="row">
-					<div class="col-md-4 text-center d-flex ftco-animate">
-						<a href="#" class="services-1">
-							<span class="icon">
-								<i class="flaticon-analysis"></i>
-							</span>
-							<div class="desc">
-								<h3 class="mb-5">Web Design</h3>
-							</div>
-						</a>
-					</div>
-					<div class="col-md-4 text-center d-flex ftco-animate">
-						<a href="#" class="services-1">
-							<span class="icon">
-								<i class="flaticon-flasks"></i>
-							</span>
-							<div class="desc">
-								<h3 class="mb-5">Phtography</h3>
-							</div>
-						</a>
-					</div>
-					<div class="col-md-4 text-center d-flex ftco-animate">
-						<a href="#" class="services-1">
-							<span class="icon">
-								<i class="flaticon-ideas"></i>
-							</span>
-							<div class="desc">
-								<h3 class="mb-5">Web Developer</h3>
-							</div>
-						</a>
-					</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-					
-					
-					
-				</div>
-    	</div>
-    </section>
-
-		
-		<section class="ftco-section" id="skills-section">
-			<div class="container">
-				<div class="row justify-content-center pb-5">
-          <div class="col-md-12 heading-section text-center ftco-animate">
-          	<h1 class="big big-2">Skills</h1>
-            <h2 class="mb-4">My Skills</h2>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
-          </div>
+<!-- ─── SKILLS ────────────────────────────────────────────────────── -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// capabilities</div>
+      <h2 class="section-title">Skills & Tools</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#128737;</span>
+          <span class="skill-cat-title">Security Tools</span>
         </div>
-				<div class="row">
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>Photoshop</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-1" role="progressbar" aria-valuenow="90"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:90%">
-							    <span>90%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>jQuery</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-2" role="progressbar" aria-valuenow="85"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:85%">
-							    <span>85%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>HTML5</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-3" role="progressbar" aria-valuenow="95"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:95%">
-							    <span>95%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>CSS3</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-4" role="progressbar" aria-valuenow="90"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:90%">
-							    <span>90%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>WordPress</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-5" role="progressbar" aria-valuenow="70"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:70%">
-							    <span>70%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6 animate-box">
-						<div class="progress-wrap ftco-animate">
-							<h3>SEO</h3>
-							<div class="progress">
-							 	<div class="progress-bar color-6" role="progressbar" aria-valuenow="80"
-							  	aria-valuemin="0" aria-valuemax="100" style="width:80%">
-							    <span>80%</span>
-							  	</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
- 
-
-    <section class="ftco-section ftco-hireme img margin-top" style="background-image: url(images/bg_1.jpg)">
-			<div class="container">
-				<div class="row justify-content-center">
-					<div class="col-md-7 ftco-animate text-center">
-						<h2>I'm <span>Available</span> to make your vision into life</h2>
-						<p>Click to reach our website</p>
-						<p class="mb-0"><a href="https://devncharm.com" class="btn btn-primary py-3 px-5">Visit</a></p>
-					</div>
-				</div>
-			</div>
-		</section>
-
-    <section class="ftco-section contact-section ftco-no-pb" id="contact-section">
-      <div class="container">
-      	<div class="row justify-content-center mb-5 pb-3">
-          <div class="col-md-7 heading-section text-center ftco-animate">
-            <h1 class="big big-2">Contact</h1>
-            <h2 class="mb-4">Contact Me</h2>
-            <p></p>
-          </div>
+        <div class="skill-tags">
+          <span class="skill-tag">Wireshark</span>
+          <span class="skill-tag">Metasploit</span>
+          <span class="skill-tag">OpenVAS</span>
+          <span class="skill-tag">Nessus</span>
+          <span class="skill-tag">Autopsy</span>
+          <span class="skill-tag">E3</span>
+          <span class="skill-tag">Splunk</span>
         </div>
-
-        <div class="row d-flex contact-info mb-5">
-          <div class="col-md-6 col-lg-3 d-flex ftco-animate">
-          	<div class="align-self-stretch box p-4 text-center">
-          		<div class="icon d-flex align-items-center justify-content-center">
-          			<span class="icon-map-signs"></span>
-          		</div>
-          		<h3 class="mb-4">Address</h3>
-	            <p>Denton, Texas, United States of Anerica</p>
-	          </div>
-          </div>
-          <div class="col-md-6 col-lg-3 d-flex ftco-animate">
-          	<div class="align-self-stretch box p-4 text-center">
-          		<div class="icon d-flex align-items-center justify-content-center">
-          			<span class="icon-phone2"></span>
-          		</div>
-          		<h3 class="mb-4">Contact Number</h3>
-	            <p><a href="tel://1234567920">+1 9403128918</a></p>
-	          </div>
-          </div>
-          <div class="col-md-6 col-lg-3 d-flex ftco-animate">
-          	<div class="align-self-stretch box p-4 text-center">
-          		<div class="icon d-flex align-items-center justify-content-center">
-          			<span class="icon-paper-plane"></span>
-          		</div>
-          		<h3 class="mb-4">Email Address</h3>
-	            <p><a href="mailto:email@josephdevasia.info">email@josephdevasia.info</a></p>
-	          </div>
-          </div>
-          <div class="col-md-6 col-lg-3 d-flex ftco-animate">
-          	<div class="align-self-stretch box p-4 text-center">
-          		<div class="icon d-flex align-items-center justify-content-center">
-          			<span class="icon-globe"></span>
-          		</div>
-          		<h3 class="mb-4">Website</h3>
-	            <p><a href="https://josephdevasia.info/">josephdevasia.info</a></p>
-	          </div>
-          </div>
+      </div>
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#128187;</span>
+          <span class="skill-cat-title">Programming</span>
         </div>
+        <div class="skill-tags">
+          <span class="skill-tag cyan">Python</span>
+          <span class="skill-tag cyan">Bash</span>
+          <span class="skill-tag cyan">C/C++</span>
+          <span class="skill-tag cyan">JavaScript</span>
+          <span class="skill-tag cyan">SQL</span>
+        </div>
+      </div>
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#9729;</span>
+          <span class="skill-cat-title">Cloud & Infra</span>
+        </div>
+        <div class="skill-tags">
+          <span class="skill-tag purple">VMware ESXi</span>
+          <span class="skill-tag purple">VirtualBox</span>
+          <span class="skill-tag purple">Cloud Platforms</span>
+          <span class="skill-tag purple">Git</span>
+          <span class="skill-tag purple">Arduino</span>
+        </div>
+      </div>
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#128421;</span>
+          <span class="skill-cat-title">Operating Systems</span>
+        </div>
+        <div class="skill-tags">
+          <span class="skill-tag">Linux</span>
+          <span class="skill-tag">Windows</span>
+          <span class="skill-tag">macOS</span>
+          <span class="skill-tag">Android</span>
+        </div>
+      </div>
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#128272;</span>
+          <span class="skill-cat-title">Security Domains</span>
+        </div>
+        <div class="skill-tags">
+          <span class="skill-tag">SIEM</span>
+          <span class="skill-tag">SOC Operations</span>
+          <span class="skill-tag">Incident Response</span>
+          <span class="skill-tag">Digital Forensics</span>
+          <span class="skill-tag">Threat Hunting</span>
+          <span class="skill-tag">Active Directory</span>
+        </div>
+      </div>
+      <div class="skill-category fade-in">
+        <div class="skill-cat-header">
+          <span class="skill-cat-icon">&#129504;</span>
+          <span class="skill-cat-title">Soft Skills</span>
+        </div>
+        <div class="skill-tags">
+          <span class="skill-tag cyan">Critical Thinking</span>
+          <span class="skill-tag cyan">Problem Solving</span>
+          <span class="skill-tag cyan">Communication</span>
+          <span class="skill-tag cyan">Analytical Mind</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="row no-gutters block-9">
-          <div class="col-md-6 order-md-last d-flex">
-            <form action="#" class="bg-light p-4 p-md-5 contact-form">
-              <div class="form-group">
-                <input type="text" class="form-control" placeholder="Your Name">
-              </div>
-              <div class="form-group">
-                <input type="text" class="form-control" placeholder="Your Email">
-              </div>
-              <div class="form-group">
-                <input type="text" class="form-control" placeholder="Subject">
-              </div>
-              <div class="form-group">
-                <textarea name="" id="" cols="30" rows="7" class="form-control" placeholder="Message"></textarea>
-              </div>
-              <div class="form-group">
-                <input type="submit" value="Send Message" class="btn btn-primary py-3 px-5">
-              </div>
-            </form>
-          
+<!-- ─── EXPERIENCE ────────────────────────────────────────────────── -->
+<section id="experience">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// work history</div>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="timeline">
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="exp-card">
+          <div class="exp-header">
+            <div class="exp-title">Desk Clerk</div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+              <div class="exp-badge current">PRESENT</div>
+              <div class="exp-badge part-time">PART-TIME</div>
+            </div>
           </div>
+          <div class="exp-company-row">
+            <div class="unt-logo">UNT</div>
+            <span class="exp-company" style="margin-bottom:0">UNT Housing and Residence Life &mdash; Denton, TX</span>
+          </div>
+          <div class="exp-date">&#128344; Jul 2025 &ndash; Present &nbsp;&bull;&nbsp; On-site</div>
+          <ul class="exp-bullets">
+            <li>Provided front-line support to residents and guests, managing check-in/check-out procedures and access control for a high-traffic campus housing environment.</li>
+            <li>Ensured compliance with university housing policies, resolving resident issues with clear communication and consistent follow-through.</li>
+            <li>Strengthened customer service, communication, and problem-solving skills in a fast-paced, service-oriented campus role.</li>
+          </ul>
+        </div>
+      </div>
 
-          <div class="col-md-6 d-flex">
-          	<div class="img" style="background-image: url(images/bg_1.png);"></div>
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="exp-card">
+          <div class="exp-header">
+            <div class="exp-title">Cybersecurity Engineer</div>
+            <div class="exp-badge">FULL TIME</div>
+          </div>
+          <div class="exp-company">Edstem Technologies &mdash; Kerala, India</div>
+          <div class="exp-date">&#128344; Jun 2023 &ndash; Dec 2024</div>
+          <ul class="exp-bullets">
+            <li>Monitored and analyzed security alerts using SIEM tools, leveraging analytical skills to identify and escalate <strong>50+ potential threats</strong>, preventing security incidents.</li>
+            <li>Investigated security incidents via initial triage, root-cause analysis, and remediation using <strong>Wireshark</strong> and <strong>Git</strong>, containing <strong>three breaches within 2 hours</strong>.</li>
+            <li>Responded to malware, phishing, and unauthorized access incidents following established playbooks, restoring normal operations within an average of <strong>45 minutes</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="exp-card">
+          <div class="exp-header">
+            <div class="exp-title">Cybersecurity Intern</div>
+            <div class="exp-badge">INTERNSHIP</div>
+          </div>
+          <div class="exp-company">Edstem Technologies &mdash; Kerala, India</div>
+          <div class="exp-date">&#128344; Aug 2021 &ndash; May 2023</div>
+          <ul class="exp-bullets">
+            <li>Used <strong>Splunk</strong> in an Apple environment to analyze <strong>500+ security logs weekly</strong>, triaged 100+ alerts, and escalated 10&ndash;15 potential threats per month.</li>
+            <li>Drafted detailed investigation reports that enabled faster threat mitigation and improved team response workflows.</li>
+            <li>Collaborated with IT team to apply containment and remediation measures, reducing mean time to response <strong>(MTTR) by 20%</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROJECTS ──────────────────────────────────────────────────── -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// builds</div>
+      <h2 class="section-title">Projects</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-grid">
+
+      <div class="project-card fade-in">
+        <div class="project-icon green">&#128272;</div>
+        <div class="project-title">Authentication System Using Zero Knowledge Proof & Verifiable Credentials</div>
+        <div class="project-desc">Privacy-preserving identity verification framework that authenticates users without revealing sensitive data. Leverages ZKP cryptographic proofs and decentralized Verifiable Credentials for trustless authentication.</div>
+        <div class="project-tags">
+          <span class="project-tag">Zero-Knowledge Proof</span>
+          <span class="project-tag">Verifiable Credentials</span>
+          <span class="project-tag">Cryptography</span>
+          <span class="project-tag">Privacy</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-icon cyan">&#9889;</div>
+        <div class="project-title">Secure E-Commerce Website for EV Charging Station</div>
+        <div class="project-desc">A hardened web platform managing EV charging station transactions and user services. Supports 100+ concurrent users with real-time monitoring, secure payment flows, and cloud-based resilience.</div>
+        <div class="project-tags">
+          <span class="project-tag">Web Security</span>
+          <span class="project-tag">Real-time Monitoring</span>
+          <span class="project-tag">100+ Concurrent Users</span>
+          <span class="project-tag">Cloud</span>
+        </div>
+      </div>
+
+      <div class="project-card fade-in">
+        <div class="project-icon purple">&#128279;</div>
+        <div class="project-title">Blockchain-Based Voting System</div>
+        <div class="project-desc">Decentralized election platform built on blockchain delivering 100% transparent, immutable, and tamper-proof voting records. Eliminates fraud risk and unauthorized alterations through cryptographic consensus.</div>
+        <div class="project-tags">
+          <span class="project-tag">Blockchain</span>
+          <span class="project-tag">Decentralized</span>
+          <span class="project-tag">Smart Contracts</span>
+          <span class="project-tag">Immutability</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── CERTIFICATIONS ────────────────────────────────────────────── -->
+<section id="certifications">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// credentials</div>
+      <h2 class="section-title">Certifications</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="certs-grid">
+
+      <div class="cert-card fade-in">
+        <div class="cert-shield">&#128737;</div>
+        <div>
+          <div class="cert-name">Certified Active Directory Red Team Specialist (AD-RTS)</div>
+          <div class="cert-issuer">Cyberwarfare Labs</div>
+          <a href="https://labs.cyberwarfare.live/credential/achievement/6982abb2fbb79ac7585869c5"
+             target="_blank" class="cert-verify">&#10003; Verify Credential</a>
+        </div>
+      </div>
+
+      <div class="cert-card fade-in">
+        <div class="cert-shield">&#128241;</div>
+        <div>
+          <div class="cert-name">Security &amp; Ethical Hacking: Attacking the Network</div>
+          <div class="cert-issuer">University of Colorado Boulder &mdash; Coursera</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);margin-bottom:0.3rem">ID: VDL6L68CB05X</div>
+          <a href="https://coursera.org/verify/VDL6L68CB05X"
+             target="_blank" class="cert-verify">&#10003; Verify Credential</a>
+        </div>
+      </div>
+
+      <div class="cert-card fade-in" style="border-color:rgba(123,47,255,0.35)">
+        <div class="cert-shield" style="background:rgba(123,47,255,0.1);border-color:rgba(123,47,255,0.3)">&#127919;</div>
+        <div>
+          <div class="cert-name">Certified Penetration Testing Specialist (CPTS)</div>
+          <div class="cert-issuer" style="color:#b478ff">Hack The Box Academy</div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.4rem">
+            <span style="display:inline-flex;align-items:center;gap:0.35rem;font-family:'Share Tech Mono',monospace;font-size:0.72rem;padding:0.2rem 0.65rem;border-radius:100px;background:rgba(123,47,255,0.12);border:1px solid rgba(123,47,255,0.35);color:#b478ff">
+              <span style="width:6px;height:6px;border-radius:50%;background:#b478ff;animation:pulse 2s infinite;display:inline-block"></span>
+              IN PROGRESS
+            </span>
           </div>
         </div>
       </div>
-    </section>
-		
 
-    <footer class="ftco-footer ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">About</h2>
-              <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
-                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
-                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4 ml-md-4">
-              <h2 class="ftco-heading-2">Links</h2>
-              <ul class="list-unstyled">
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Home</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>About</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Services</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Projects</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Contact</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Services</h2>
-              <ul class="list-unstyled">
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Web Design</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Web Development</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Business Strategy</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Data Analysis</a></li>
-                <li><a href="#"><span class="icon-long-arrow-right mr-2"></span>Graphic Design</a></li>
-              </ul>
-            </div>
-          </div>
-          
-        </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
+    </div>
+  </div>
+</section>
 
-            <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved  <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank"></a>
-  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
+<!-- ─── CONTACT ───────────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// reach out</div>
+      <h2 class="section-title">Get In Touch</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-wrapper">
+      <div class="contact-info fade-in">
+        <h3>Let's connect</h3>
+        <div class="contact-links">
+          <a href="mailto:joseph.devasia1@outlook.com" class="contact-link">
+            <div class="contact-link-icon">&#9993;</div>
+            <div>
+              <div class="contact-link-label">EMAIL</div>
+              <div class="contact-link-val">joseph.devasia1@outlook.com</div>
+            </div>
+          </a>
+          <a href="tel:9403128918" class="contact-link">
+            <div class="contact-link-icon">&#128222;</div>
+            <div>
+              <div class="contact-link-label">PHONE</div>
+              <div class="contact-link-val">(940) 312-8918</div>
+            </div>
+          </a>
+          <a href="https://linkedin.com/in/josephdevasia/" target="_blank" class="contact-link">
+            <div class="contact-link-icon">&#128101;</div>
+            <div>
+              <div class="contact-link-label">LINKEDIN</div>
+              <div class="contact-link-val">linkedin.com/in/josephdevasia/</div>
+            </div>
+          </a>
+          <a href="https://github.com/josephdevasia1" target="_blank" class="contact-link">
+            <div class="contact-link-icon">&#128190;</div>
+            <div>
+              <div class="contact-link-label">GITHUB</div>
+              <div class="contact-link-val">github.com/josephdevasia1</div>
+            </div>
+          </a>
+          <div class="contact-link" style="cursor:default">
+            <div class="contact-link-icon">&#128205;</div>
+            <div>
+              <div class="contact-link-label">LOCATION</div>
+              <div class="contact-link-val">Denton, TX &mdash; Open to Hybrid / Remote</div>
+            </div>
           </div>
         </div>
       </div>
-    </footer>
-    
-  
+      <div class="fade-in">
+        <form class="contact-form" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">NAME</label>
+            <input class="form-input" type="text" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">EMAIL</label>
+            <input class="form-input" type="email" placeholder="your@email.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">SUBJECT</label>
+            <input class="form-input" type="text" placeholder="Opportunity / Collaboration / Other" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">MESSAGE</label>
+            <textarea class="form-input" placeholder="Tell me about the opportunity or how I can help..."></textarea>
+          </div>
+          <button type="submit" class="form-submit">SEND MESSAGE</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <!-- loader -->
-  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+<!-- Footer -->
+<footer>
+  <p>Built by <span>Joseph Devasia</span> &mdash; Cybersecurity Engineer &amp; Developer</p>
+  <p style="margin-top:0.4rem">Denton, TX &bull; <span>joseph.devasia1@outlook.com</span></p>
+</footer>
 
+<!-- ─── JAVASCRIPT ─────────────────────────────────────────────────── -->
+<script>
+/* ── Matrix Rain ────────────────────────────────────────────────── */
+(function(){
+  const canvas = document.getElementById('matrix-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, cols, drops;
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>{}[];:/\\|';
 
-  <script src="js/jquery.min.js"></script>
-  <script src="js/jquery-migrate-3.0.1.min.js"></script>
-  <script src="js/popper.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/jquery.easing.1.3.js"></script>
-  <script src="js/jquery.waypoints.min.js"></script>
-  <script src="js/jquery.stellar.min.js"></script>
-  <script src="js/owl.carousel.min.js"></script>
-  <script src="js/jquery.magnific-popup.min.js"></script>
-  <script src="js/aos.js"></script>
-  <script src="js/jquery.animateNumber.min.js"></script>
-  <script src="js/scrollax.min.js"></script>
-  
-  <script src="js/main.js"></script>
-    
-  </body>
+  function init(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    const fontSize = 14;
+    cols = Math.floor(W / fontSize);
+    drops = Array(cols).fill(1);
+    ctx.font = fontSize + 'px Share Tech Mono';
+  }
+
+  function draw(){
+    ctx.fillStyle = 'rgba(8,12,16,0.05)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#00ff41';
+    for(let i = 0; i < drops.length; i++){
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * 14, drops[i] * 14);
+      if(drops[i] * 14 > H && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+
+  init();
+  setInterval(draw, 50);
+  window.addEventListener('resize', init);
+})();
+
+/* ── Typing Animation ───────────────────────────────────────────── */
+(function(){
+  const el = document.getElementById('typed-title');
+  const phrases = [
+    'Cybersecurity Engineer',
+    'SOC Analyst & Blue Teamer',
+    'Incident Responder',
+    'Security Researcher',
+    'MS Cybersecurity Student',
+  ];
+  let pi = 0, ci = 0, deleting = false;
+
+  function tick(){
+    const phrase = phrases[pi];
+    const displayed = deleting ? phrase.slice(0, ci--) : phrase.slice(0, ci++);
+    el.innerHTML = displayed + '<span class="cursor">|</span>';
+
+    if (!deleting && ci > phrase.length) {
+      deleting = true;
+      setTimeout(tick, 1800);
+    } else if (deleting && ci < 0) {
+      deleting = false;
+      pi = (pi + 1) % phrases.length;
+      ci = 0;
+      setTimeout(tick, 400);
+    } else {
+      setTimeout(tick, deleting ? 60 : 100);
+    }
+  }
+  tick();
+})();
+
+/* ── Counter Animation ──────────────────────────────────────────── */
+function animateCounters(){
+  document.querySelectorAll('[data-target]').forEach(el => {
+    const target = +el.dataset.target;
+    const suffix = el.dataset.suffix || '+';
+    let current = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = Math.floor(current) + suffix;
+      if(current >= target) clearInterval(timer);
+    }, 25);
+  });
+}
+
+/* ── Scroll Animations ──────────────────────────────────────────── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // trigger counters when hero stats visible
+      if(e.target.closest('#hero')){
+        animateCounters();
+      }
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Trigger counters on load (hero visible from start)
+setTimeout(animateCounters, 600);
+
+/* ── Nav scroll effect ──────────────────────────────────────────── */
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  nav.style.boxShadow = window.scrollY > 50
+    ? '0 4px 30px rgba(0,255,65,0.08)'
+    : 'none';
+});
+
+/* ── Contact form ───────────────────────────────────────────────── */
+function handleFormSubmit(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = 'MESSAGE SENT ✓';
+  btn.style.background = 'linear-gradient(135deg,#00ff41,#00ff41)';
+  setTimeout(() => {
+    btn.textContent = 'SEND MESSAGE';
+    btn.style.background = '';
+    e.target.reset();
+  }, 3000);
+}
+
+/* ── Interactive Terminal ────────────────────────────────────────── */
+(function(){
+  const output  = document.getElementById('term-output');
+  const input   = document.getElementById('term-input');
+  const display = document.getElementById('term-display');
+  const caret   = document.getElementById('term-caret');
+  const termEl  = document.getElementById('terminal');
+
+  let history = [], histIdx = -1, tabCandidates = [], tabIdx = 0, lastTab = '';
+
+  /* ── Command definitions ──────────────────────────────────────── */
+  const COMMANDS = {
+    help: () => `
+<span class="t-hi">Available commands:</span>
+<span class="t-dim">─────────────────────────────────────────────────</span>
+  <span class="t-cmd">whoami</span>          About Joseph Devasia
+  <span class="t-cmd">cat profile.json</span> Full profile details
+  <span class="t-cmd">ls</span>              List directory contents
+  <span class="t-cmd">cat skills.txt</span>  Skills &amp; tools
+  <span class="t-cmd">cat exp.txt</span>     Work experience
+  <span class="t-cmd">cat projects.txt</span> Projects
+  <span class="t-cmd">cat certs.txt</span>   Certifications
+  <span class="t-cmd">contact</span>         Contact information
+  <span class="t-cmd">ping joseph</span>     Check if Joseph is available
+  <span class="t-cmd">nmap --status</span>   Current status
+  <span class="t-cmd">history</span>         Command history
+  <span class="t-cmd">clear</span>           Clear terminal
+<span class="t-dim">─────────────────────────────────────────────────</span>
+Tip: use <span class="t-hi">↑</span> / <span class="t-hi">↓</span> for history, <span class="t-hi">Tab</span> to autocomplete`,
+
+    whoami: () => `
+<span class="t-hi">Joseph Devasia</span>
+<span class="t-dim">Cybersecurity Engineer &amp; MS Cybersecurity Student</span>
+
+  University of North Texas, Denton TX  |  GPA 3.5 / 4.0
+  2+ years SOC &amp; security engineering experience
+  Certified Active Directory Red Team Specialist (AD-RTS)
+  Open to: Blue Team · SOC · Security Engineering roles`,
+
+    'cat profile.json': () => `<span class="t-dim">{</span>
+  <span class="t-cmd">"name"</span><span class="t-dim">:</span>       <span class="t-val">"Joseph Devasia"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"role"</span><span class="t-dim">:</span>       <span class="t-val">"Cybersecurity Engineer"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"location"</span><span class="t-dim">:</span>   <span class="t-val">"Denton, TX"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"degree"</span><span class="t-dim">:</span>     <span class="t-val">"M.S. Cybersecurity"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"university"</span><span class="t-dim">:</span> <span class="t-val">"University of North Texas"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"gpa"</span><span class="t-dim">:</span>        <span class="t-val">3.5</span><span class="t-dim">,</span>
+  <span class="t-cmd">"grad"</span><span class="t-dim">:</span>       <span class="t-val">"Dec 2026"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"exp_years"</span><span class="t-dim">:</span>  <span class="t-val">2</span><span class="t-dim">,</span>
+  <span class="t-cmd">"cert"</span><span class="t-dim">:</span>       <span class="t-val">"AD-RTS Certified"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"email"</span><span class="t-dim">:</span>      <span class="t-val">"joseph.devasia1@outlook.com"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"github"</span><span class="t-dim">:</span>     <span class="t-val">"github.com/josephdevasia1"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"linkedin"</span><span class="t-dim">:</span>   <span class="t-val">"linkedin.com/in/josephdevasia"</span><span class="t-dim">,</span>
+  <span class="t-cmd">"status"</span><span class="t-dim">:</span>     <span class="t-hi">"open_to_work"</span>
+<span class="t-dim">}</span>`,
+
+    ls: () => `<span class="t-blue">drwxr-xr-x</span>  education/
+<span class="t-blue">drwxr-xr-x</span>  experience/
+<span class="t-blue">drwxr-xr-x</span>  projects/
+<span class="t-blue">drwxr-xr-x</span>  certifications/
+<span class="t-hi">-rw-r--r--</span>  profile.json
+<span class="t-hi">-rw-r--r--</span>  skills.txt
+<span class="t-hi">-rw-r--r--</span>  exp.txt
+<span class="t-hi">-rw-r--r--</span>  projects.txt
+<span class="t-hi">-rw-r--r--</span>  certs.txt
+<span class="t-sec">-rwxr-xr-x</span>  contact.sh`,
+
+    'cat skills.txt': () => `
+<span class="t-hi">[ Security Tools ]</span>
+  Wireshark · Metasploit · OpenVAS · Nessus · Autopsy · E3 · Splunk
+
+<span class="t-hi">[ Programming ]</span>
+  Python · Bash · C/C++ · JavaScript · SQL
+
+<span class="t-hi">[ Cloud &amp; Infra ]</span>
+  VMware ESXi · VirtualBox · Cloud Platforms · Git · Arduino
+
+<span class="t-hi">[ Operating Systems ]</span>
+  Linux · Windows · macOS · Android
+
+<span class="t-hi">[ Security Domains ]</span>
+  SIEM · SOC Ops · Incident Response · Digital Forensics
+  Threat Hunting · Active Directory · Vulnerability Scanning`,
+
+    'cat exp.txt': () => `
+<span class="t-hi">Desk Clerk</span>              <span class="t-dim">|  UNT Housing and Residence Life, Denton TX</span>
+<span style="color:#00d46a">Jul 2025 – Present  ⬤ CURRENT</span>
+  ▹ Front-line support for residents — check-in/out &amp; access control
+  ▹ Ensured compliance with housing policies in a fast-paced environment
+  ▹ Built communication &amp; problem-solving skills under pressure
+
+<span class="t-hi">Cybersecurity Engineer</span>  <span class="t-dim">|  Edstem Technologies, India</span>
+<span class="t-sec">Jun 2023 – Dec 2024</span>
+  ▹ Identified &amp; escalated <span class="t-hi">50+</span> potential threats via SIEM
+  ▹ Contained <span class="t-hi">3 breaches</span> within 2 hrs using Wireshark
+  ▹ Avg incident resolution: <span class="t-hi">45 minutes</span>
+
+<span class="t-hi">Cybersecurity Intern</span>     <span class="t-dim">|  Edstem Technologies, India</span>
+<span class="t-sec">Aug 2021 – May 2023</span>
+  ▹ Analyzed <span class="t-hi">500+</span> security logs per week with Splunk
+  ▹ Triaged <span class="t-hi">100+</span> alerts, escalated 10–15 threats/month
+  ▹ Reduced MTTR by <span class="t-hi">20%</span> through improved workflows`,
+
+    'cat projects.txt': () => `
+<span class="t-hi">[1] Authentication System — Zero Knowledge Proof &amp; Verifiable Credentials</span>
+  Privacy-preserving identity framework using ZKP + decentralized VCs.
+  Stack: Cryptography · ZKP · VC Standards
+
+<span class="t-hi">[2] Secure E-Commerce — EV Charging Station</span>
+  Hardened web platform, 100+ concurrent users, real-time monitoring.
+  Stack: Web Security · Cloud · Real-time Systems
+
+<span class="t-hi">[3] Blockchain-Based Voting System</span>
+  Decentralized, tamper-proof election platform with 100% immutable records.
+  Stack: Blockchain · Smart Contracts · Cryptography`,
+
+    'cat certs.txt': () => `
+<span class="t-hi">[CERT 1]</span> Certified Active Directory Red Team Specialist <span class="t-dim">(AD-RTS)</span>
+  Issuer  : Cyberwarfare Labs
+  Verify  : <span class="t-sec">labs.cyberwarfare.live/credential/achievement/6982abb2...</span>
+
+<span class="t-hi">[CERT 2]</span> Security &amp; Ethical Hacking: Attacking the Network
+  Issuer  : University of Colorado Boulder (Coursera)
+  Cred ID : VDL6L68CB05X
+  Verify  : <span class="t-sec">coursera.org/verify/VDL6L68CB05X</span>
+
+<span style="color:#b478ff">[CERT 3]</span> Certified Penetration Testing Specialist <span class="t-dim">(CPTS)</span>
+  Issuer  : Hack The Box Academy
+  Status  : <span style="color:#b478ff">⬤ IN PROGRESS</span>`,
+
+    contact: () => `
+<span class="t-hi">[ Contact Joseph ]</span>
+  Email    : <span class="t-sec">joseph.devasia1@outlook.com</span>
+  Phone    : <span class="t-sec">(940) 312-8918</span>
+  LinkedIn : <span class="t-sec">linkedin.com/in/josephdevasia/</span>
+  GitHub   : <span class="t-sec">github.com/josephdevasia1</span>
+  Location : <span class="t-sec">Denton, TX — Open to Hybrid / Remote</span>`,
+
+    'ping joseph': () => {
+      const times = [12, 8, 15, 10].map(t => t + Math.floor(Math.random()*5));
+      return `PING joseph.devasia (open_to_work): 56 bytes of data.
+64 bytes from joseph: icmp_seq=1 ttl=64 time=<span class="t-hi">${times[0]} ms</span>
+64 bytes from joseph: icmp_seq=2 ttl=64 time=<span class="t-hi">${times[1]} ms</span>
+64 bytes from joseph: icmp_seq=3 ttl=64 time=<span class="t-hi">${times[2]} ms</span>
+64 bytes from joseph: icmp_seq=4 ttl=64 time=<span class="t-hi">${times[3]} ms</span>
+
+--- joseph.devasia ping statistics ---
+4 packets transmitted, 4 received, <span class="t-hi">0% packet loss</span>
+<span class="t-hi">Status: ONLINE &amp; AVAILABLE</span>`;
+    },
+
+    'nmap --status': () => `Starting Nmap scan on joseph.devasia...
+
+PORT      STATE   SERVICE
+<span class="t-hi">22/tcp</span>    open    ssh          <span class="t-dim">→ collaboration</span>
+<span class="t-hi">80/tcp</span>    open    http         <span class="t-dim">→ portfolio live</span>
+<span class="t-hi">443/tcp</span>   open    https        <span class="t-dim">→ secure comms</span>
+<span class="t-hi">3000/tcp</span>  open    dev-server   <span class="t-dim">→ always building</span>
+9999/tcp  closed  opportunities <span class="t-dim">→ <span class="t-hi">accepting connections</span></span>
+
+Nmap done: 1 IP — <span class="t-hi">Host is up</span>, open to work.`,
+
+    history: () => history.length
+      ? history.map((c, i) => `  <span class="t-dim">${String(i+1).padStart(3)}</span>  ${c}`).join('\n')
+      : '<span class="t-dim">(no history yet)</span>',
+
+    clear: () => null, // handled separately
+
+    pwd: () => '/home/jdevasia/portfolio',
+
+    'uname -a': () => `Linux jdevasia-unt 6.1.0-sec #1 SMP Cybersecurity x86_64 GNU/Linux`,
+
+    date: () => new Date().toString(),
+
+    echo: (args) => args || '',
+  };
+
+  const ALL_CMDS = Object.keys(COMMANDS);
+
+  /* ── Boot message ─────────────────────────────────────────────── */
+  function boot(){
+    appendOutput(`<span class="t-hi">Joseph Devasia — Interactive Portfolio Terminal</span>
+<span class="t-dim">────────────────────────────────────────────────</span>
+Type <span class="t-cmd">help</span> to see available commands.
+`);
+  }
+
+  /* ── Output helpers ───────────────────────────────────────────── */
+  function appendOutput(html){
+    const line = document.createElement('div');
+    line.innerHTML = html;
+    output.appendChild(line);
+    scrollBottom();
+  }
+
+  function appendEcho(cmd){
+    const line = document.createElement('div');
+    line.innerHTML = `<span class="t-prompt">jdevasia@unt</span><span class="t-dim">:</span><span class="t-prompt">~</span><span class="t-dim">$</span> <span class="t-cmd">${escHtml(cmd)}</span>`;
+    output.appendChild(line);
+  }
+
+  function scrollBottom(){
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function escHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Run a command ────────────────────────────────────────────── */
+  function run(raw){
+    const cmd = raw.trim();
+    if(!cmd) return;
+
+    // history
+    if(history[history.length-1] !== cmd) history.push(cmd);
+    histIdx = history.length;
+
+    appendEcho(cmd);
+
+    if(cmd === 'clear'){
+      output.innerHTML = '';
+      return;
+    }
+
+    // look up command (support echo with args)
+    let handler = COMMANDS[cmd];
+    if(!handler && cmd.startsWith('echo ')){
+      handler = () => COMMANDS.echo(escHtml(cmd.slice(5)));
+    }
+
+    if(handler){
+      const result = handler();
+      if(result !== null && result !== undefined){
+        appendOutput(result);
+      }
+    } else {
+      appendOutput(`<span class="t-err">zsh: command not found: ${escHtml(cmd)}</span>\nType <span class="t-cmd">help</span> to see available commands.`);
+    }
+    appendOutput(''); // blank spacer
+  }
+
+  /* ── Tab completion ───────────────────────────────────────────── */
+  function tabComplete(){
+    const val = input.value;
+    if(val !== lastTab){
+      tabCandidates = ALL_CMDS.filter(c => c.startsWith(val));
+      tabIdx = 0;
+      lastTab = val;
+    }
+    if(!tabCandidates.length) return;
+    if(tabCandidates.length === 1){
+      input.value = tabCandidates[0];
+    } else {
+      input.value = tabCandidates[tabIdx % tabCandidates.length];
+      tabIdx++;
+    }
+    syncDisplay();
+  }
+
+  /* ── Sync hidden input → visible display ─────────────────────── */
+  function syncDisplay(){
+    display.textContent = input.value;
+  }
+
+  /* ── Key handling ─────────────────────────────────────────────── */
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      const val = input.value;
+      input.value = '';
+      syncDisplay();
+      lastTab = '';
+      run(val);
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      if(histIdx > 0){ histIdx--; input.value = history[histIdx]; syncDisplay(); }
+    } else if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      if(histIdx < history.length - 1){ histIdx++; input.value = history[histIdx]; }
+      else { histIdx = history.length; input.value = ''; }
+      syncDisplay();
+    } else if(e.key === 'Tab'){
+      e.preventDefault();
+      tabComplete();
+    } else if(e.key === 'c' && e.ctrlKey){
+      e.preventDefault();
+      appendEcho(input.value + '^C');
+      input.value = ''; syncDisplay();
+    } else if(e.key === 'l' && e.ctrlKey){
+      e.preventDefault();
+      output.innerHTML = '';
+    }
+  });
+
+  input.addEventListener('input', () => { syncDisplay(); lastTab = ''; });
+
+  /* click anywhere on terminal focuses input */
+  termEl.addEventListener('click', () => input.focus());
+
+  /* hide caret when unfocused */
+  input.addEventListener('blur',  () => caret.style.display = 'none');
+  input.addEventListener('focus', () => caret.style.display = 'inline-block');
+
+  boot();
+  input.focus();
+})();
+</script>
+</body>
 </html>
