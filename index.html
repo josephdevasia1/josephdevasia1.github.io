@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Joseph Devasia | Cybersecurity Portfolio</title>
+  <title>Joseph Devasia | Portfolio</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23080c10'/%3E%3Cpath d='M32 6 L54 14 L54 34 C54 48 44 57 32 62 C20 57 10 48 10 34 L10 14 Z' fill='none' stroke='%2300ff41' stroke-width='2'/%3E%3Ctext x='32' y='40' font-family='Arial Black,sans-serif' font-weight='900' font-size='18' fill='%2300ff41' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -1499,7 +1499,7 @@ Type <span class="t-cmd">help</span> to see available commands.
   /* ── Output helpers ───────────────────────────────────────────── */
   function appendOutput(html){
     const line = document.createElement('div');
-    line.innerHTML = html;
+    line.innerHTML = html.replace(/\n/g, '<br>');
     output.appendChild(line);
     scrollBottom();
   }
