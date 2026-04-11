@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Joseph Devasia | Portfolio</title>
+  <title>Joseph Devasia | Cybersecurity Portfolio</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23080c10'/%3E%3Cpath d='M32 6 L54 14 L54 34 C54 48 44 57 32 62 C20 57 10 48 10 34 L10 14 Z' fill='none' stroke='%2300ff41' stroke-width='2'/%3E%3Ctext x='32' y='40' font-family='Arial Black,sans-serif' font-weight='900' font-size='18' fill='%2300ff41' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -1531,6 +1531,120 @@ Type <span class="t-cmd">help</span> to see available commands.
 
     if(cmd === 'clear'){
       output.innerHTML = '';
+      return;
+    }
+
+    // ── Funny easter egg commands ──────────────────────────────────
+    const FUNNY = {
+      'sudo': () => `<span class="t-err">[sudo] password for jdevasia:</span> <span class="t-dim">***************</span>
+<span class="t-err">Sorry, try again.</span>
+<span class="t-err">[sudo] password for jdevasia:</span> <span class="t-dim">***************</span>
+<span class="t-err">sudo: 3 incorrect password attempts</span>
+<span class="t-hi">Nice try. This portfolio is hardened. 🔒</span>`,
+
+      'su': () => `<span class="t-err">Authentication failure.</span>
+<span class="t-hi">You are not root. You are a visitor. Welcome. 👀</span>`,
+
+      'rm -rf /': () => `<span class="t-err">rm: it is dangerous to operate recursively on '/'</span>
+<span class="t-err">rm: use --no-preserve-root to override this failsafe</span>
+<span class="t-hi">...I'm not doing that. I JUST built this portfolio. 😤</span>`,
+
+      'rm -rf': () => `<span class="t-err">rm: missing operand</span>
+<span class="t-hi">Careful with that thing. Are you a red teamer or something? 👀</span>`,
+
+      'hack': () => `Initializing hack sequence...
+<span class="t-dim">▓▓▓▓▓▓▓▓▓░░░░░░░░░░</span> 45%
+<span class="t-err">ERROR: target is already a cybersecurity engineer.</span>
+<span class="t-hi">You can't out-hack the hacker. 😎</span>`,
+
+      'exploit': () => `<span class="t-err">Searching for CVEs...</span>
+<span class="t-dim">Found: CVE-2026-NOPE | Severity: IMAGINARY</span>
+<span class="t-hi">All vulnerabilities patched. Try cat skills.txt instead. 🛡️</span>`,
+
+      'cat /etc/passwd': () => `root:x:0:0:root:/root:/bin/zsh
+jdevasia:x:1000:1000:Joseph Devasia:/home/jdevasia:/bin/zsh
+<span class="t-hi">Wow okay. Aggressive. At least use grep. 🤨</span>`,
+
+      'cat /etc/shadow': () => `<span class="t-err">cat: /etc/shadow: Permission denied</span>
+<span class="t-hi">That's above your clearance level, friend. 🔐</span>`,
+
+      'ssh root@joseph': () => `ssh: connect to host joseph port 22: Connection refused
+<span class="t-hi">No unauthorized access. This isn't your pentesting lab. 😄</span>`,
+
+      'nmap': () => `<span class="t-hi">Hey, I like the way you think. Try:</span> <span class="t-cmd">nmap --status</span>`,
+
+      'ls -la': () => `total 9001
+<span class="t-blue">drwxr-xr-x</span>  jdevasia jdevasia  .
+<span class="t-blue">drwxr-xr-x</span>  jdevasia jdevasia  ..
+<span class="t-hi">-rwx------</span>  jdevasia jdevasia  secrets.enc  <span class="t-dim">(nice try)</span>
+<span class="t-hi">-rw-r--r--</span>  jdevasia jdevasia  profile.json
+<span class="t-hi">-rw-r--r--</span>  jdevasia jdevasia  skills.txt
+<span class="t-hi">-rw-r--r--</span>  jdevasia jdevasia  certs.txt`,
+
+      'ifconfig': () => `eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;
+      inet <span class="t-hi">127.0.0.1</span>  netmask 255.0.0.0
+      ether <span class="t-hi">de:ad:be:ef:ca:fe</span>
+<span class="t-dim">// yes that's a real MAC format. No, you can't have mine.</span>`,
+
+      'vim': () => `<span class="t-hi">Entering vim...</span>
+<span class="t-dim">tip: to exit, type :q!</span>
+<span class="t-err">just kidding, you're already trapped. 😈</span>
+<span class="t-dim">(type 'exit' or 'clear' to escape)</span>`,
+
+      'exit': () => `<span class="t-hi">logout</span>
+<span class="t-dim">Where are you going? The portfolio isn't done yet! Come back! 😭</span>`,
+
+      'reboot': () => `<span class="t-err">Broadcast message from jdevasia@unt:</span>
+The system is going down for reboot NOW!
+<span class="t-hi">...just kidding. Portfolio stays up. 24/7. 💪</span>`,
+
+      'shutdown': () => `<span class="t-err">Shutdown: Need to be root.</span>
+<span class="t-hi">I didn't spend this long building the portfolio to let you shut it down. 🙄</span>`,
+
+      'git push --force': () => `<span class="t-err">remote: Permission denied (publickey)</span>
+<span class="t-hi">Force push rejected. Joseph's commits are protected. 🛡️</span>`,
+
+      'curl': () => `<span class="t-hi">curl joseph.devasia — you're already here! 🎉</span>
+Try <span class="t-cmd">contact</span> to actually reach out.`,
+
+      'python': () => `Python 3.12.0 (main, Oct  2 2023)
+Type "help" for more information.
+<span class="t-hi">&gt;&gt;&gt;</span> print("Joseph is open to work")
+Joseph is open to work
+<span class="t-hi">&gt;&gt;&gt;</span> <span class="t-dim">█</span>`,
+
+      'python3': () => `Python 3.12.0 (main, Oct  2 2023)
+<span class="t-hi">&gt;&gt;&gt;</span> print("hire_joseph = True")
+hire_joseph = True`,
+
+      'nano': () => `<span class="t-hi">  GNU nano — hire_joseph.txt</span>
+<span class="t-dim">─────────────────────────────────────</span>
+Yes, hire him. He's great.
+
+<span class="t-dim">^X Exit   ^O Write   ^G Help</span>`,
+
+      'grep -r password': () => `<span class="t-err">grep: access denied on sensitive files</span>
+<span class="t-hi">Credentials aren't stored in plaintext here. What kind of engineer do you think I am? 😤</span>`,
+
+      'whoami': null, // falls through to real command
+    };
+
+    // check funny commands first (prefix match for some)
+    let funnyHandler = FUNNY[cmd];
+    if(funnyHandler === undefined){
+      // prefix checks
+      if(cmd.startsWith('sudo ')) funnyHandler = FUNNY['sudo'];
+      else if(cmd.startsWith('python3 ')) funnyHandler = FUNNY['python3'];
+      else if(cmd.startsWith('python ')) funnyHandler = FUNNY['python'];
+      else if(cmd.startsWith('nmap ') && cmd !== 'nmap --status') funnyHandler = FUNNY['nmap'];
+      else if(cmd.startsWith('ssh ')) funnyHandler = FUNNY['ssh root@joseph'];
+      else if(cmd.startsWith('curl ')) funnyHandler = FUNNY['curl'];
+      else if(cmd.startsWith('rm ')) funnyHandler = FUNNY['rm -rf'];
+      else if(cmd.startsWith('grep ')) funnyHandler = FUNNY['grep -r password'];
+    }
+    if(funnyHandler !== null && funnyHandler !== undefined){
+      appendOutput(funnyHandler());
+      appendOutput('');
       return;
     }
 
