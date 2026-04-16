@@ -466,7 +466,7 @@ function submitRSVP(){
   btn.textContent='SENDING...';
   btn.disabled=true;
 
-  emailjs.init('LfC8Vr9JcgVtukt4z');
+  var attending = att==='yes';
 
   var templateParams={
     to_name: name,
@@ -474,11 +474,22 @@ function submitRSVP(){
     from_name: name,
     reply_to: email,
     phone: phone||'Not provided',
-    attendance: att==='yes'?'Will attend':'Cannot attend',
+    attendance: attending?'Will attend':'Cannot attend',
     guests: guests,
     relation: relation||'Not specified',
-    message: msg||'None'
+    message: msg||'None',
+    greeting: attending
+      ? 'We are delighted to confirm we have received your RSVP and we look forward to celebrating this blessed day with you.'
+      : 'We are sorry you are unable to join us. Though you will not be with us in person, your thoughts and prayers will mean the world to us on this special day.',
+    closing: attending
+      ? 'We look forward to seeing you on May 6th at 11:00 AM at Lourdes Matha Church, Pacha Chekkidikadu.'
+      : 'We will keep you in our prayers on this special day. Your blessings and kind wishes mean everything to us.',
+    subject_line: attending
+      ? 'You are confirmed - Baptism of Aneena Anna Anoop'
+      : 'Thank you for letting us know - Aneena Baptism'
   };
+
+  emailjs.init('LfC8Vr9JcgVtukt4z');
 
   emailjs.send('service_8vu4096','template_mpwsrya',templateParams)
   .then(function(){
@@ -489,7 +500,7 @@ function submitRSVP(){
     var box=document.getElementById('success-box');
     var txt=document.getElementById('success-text');
     var note='<br><br><em style="font-size:14px;color:#9C8A5A;">A confirmation email has been sent to '+email+'</em>';
-    if(att==='yes'){
+    if(attending){
       txt.innerHTML='Thank you, <strong>'+name+'</strong>!<br>We are so happy you will be joining us to celebrate Aneena baptism.<br>See you on May 6th at 11:00 AM.'+note;
     } else {
       txt.innerHTML='Thank you, <strong>'+name+'</strong>.<br>We will miss you on this special day.<br>Your prayers and blessings mean everything to us.'+note;
@@ -500,7 +511,7 @@ function submitRSVP(){
     console.error('EmailJS error details:', JSON.stringify(err));
     btn.textContent='SEND YOUR RSVP';
     btn.disabled=false;
-    alert('Error: '+err.text+' (status: '+err.status+')');
+    alert('Error: '+(err.text||'Something went wrong')+' (status: '+err.status+')');
   });
 }
 
