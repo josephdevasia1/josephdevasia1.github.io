@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef2f0;
+    --surface: #ffffff;
+    --surface-2: #f6f8f7;
+    --ink: #16221e;
+    --muted: #5b6a64;
+    --line: #d9e1dd;
+    --accent: #1d7556;
+    --accent-soft: #dcefe7;
+    --on-accent: #ffffff;
+    --warn: #a86a12;
+    --warn-soft: #fbefd9;
+    --bad: #b8322a;
+    --bad-soft: #f8e0dd;
+    --good: #1d7556;
+    --good-soft: #dcefe7;
+    --daisy: #c03f78;
+    --dinu: #2d68c8;
+    --diju: #7b52c9;
+    --radius: 10px;
+    --font: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e1513;
+      --surface: #16201c;
+      --surface-2: #1b2723;
+      --ink: #e4ede9;
+      --muted: #93a49d;
+      --line: #27352f;
+      --accent: #3db287;
+      --accent-soft: #173a2d;
+      --on-accent: #06140f;
+      --warn: #e2a64a;
+      --warn-soft: #3a2c14;
+      --bad: #ee7a70;
+      --bad-soft: #3d1c19;
+      --good: #3db287;
+      --good-soft: #173a2d;
+      --daisy: #ec79ab;
+      --dinu: #6f9ff0;
+      --diju: #a88cec;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e1513; --surface: #16201c; --surface-2: #1b2723; --ink: #e4ede9; --muted: #93a49d;
+    --line: #27352f; --accent: #3db287; --accent-soft: #173a2d; --on-accent: #06140f;
+    --warn: #e2a64a; --warn-soft: #3a2c14; --bad: #ee7a70; --bad-soft: #3d1c19;
+    --good: #3db287; --good-soft: #173a2d; --daisy: #ec79ab; --dinu: #6f9ff0; --diju: #a88cec;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.5 var(--font);
+    padding: 0 16px;
+    padding-block: 0 48px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding-top: 24px;
+  }
+  .brand { display: flex; flex-direction: column; gap: 2px; }
+  .brand h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; }
+  .brand p { margin: 0; color: var(--muted); font-size: 14px; }
+  .top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sync { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .sync.live .dot { background: var(--good); box-shadow: 0 0 0 3px var(--good-soft); }
+  .sync.local .dot { background: var(--warn); }
+  .sync.err .dot { background: var(--bad); }
+
+  .banner {
+    background: var(--warn-soft); color: var(--ink); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 10px 14px; font-size: 14px;
+  }
+  .banner b { color: var(--warn); }
+
+  /* Summary */
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .stat .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+  .stat .value { font-size: 22px; font-weight: 600; overflow-wrap: anywhere; }
+  .stat .sub { font-size: 13px; color: var(--muted); }
+  .stat.debt .value { color: var(--bad); }
+  @media (max-width: 820px) { .summary { grid-template-columns: repeat(2, 1fr); } }
+
+  .shares { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .shares-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .shares-head h2 { font-size: 15px; font-weight: 700; }
+  .shares-head span { font-size: 13px; color: var(--muted); }
+  .bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+  .bar div { height: 100%; transition: width .3s; }
+  .legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .legend .who { display: flex; flex-direction: column; gap: 0; }
+  .legend .who b { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; }
+  .legend .who b i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .legend .who span { font-size: 14px; }
+  .legend .who small { color: var(--muted); font-size: 12px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+  .tab {
+    appearance: none; border: 0; background: none; color: var(--muted); font: 600 15px var(--font);
+    padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab .count { font-family: var(--mono); font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; margin-left: 6px; color: var(--muted); }
+
+  .panel { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 820px) { .panel { grid-template-columns: 1fr; } }
+
+  /* Forms */
+  form.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  form.card h3 { font-size: 16px; font-weight: 700; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  input, select, textarea {
+    font: 15px var(--font); color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+  .who-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+  .who-pick input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .who-pick label {
+    cursor: pointer; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--ink); font-weight: 600; font-size: 14px;
+  }
+  .who-pick input:checked + label { background: var(--c); border-color: var(--c); color: #fff; }
+  .who-pick input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  button { font: 600 14px var(--font); cursor: pointer; border-radius: 8px; padding: 9px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  button.small { padding: 5px 10px; font-size: 13px; }
+  button.ghost { background: none; border-color: transparent; color: var(--muted); }
+  button.ghost:hover { color: var(--ink); background: var(--surface-2); }
+  button.danger:hover { color: var(--bad); }
+  button.danger-fill { background: var(--bad); border-color: var(--bad); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  /* Lists */
+  .list-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .list-tools { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip-btn { padding: 5px 12px; border-radius: 999px; font-size: 13px; }
+  .chip-btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .search { max-width: 220px; padding: 6px 10px; font-size: 14px; }
+
+  .ledger { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .month-head { display: flex; justify-content: space-between; padding: 8px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .month-head .num { color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .tx { display: grid; grid-template-columns: 64px 1fr auto auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .ledger > .tx:last-child { border-bottom: 0; }
+  .tx .date { font-size: 13px; color: var(--muted); line-height: 1.2; }
+  .tx .date b { display: block; font-size: 18px; color: var(--ink); font-weight: 600; }
+  .tx .what { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tx .what .purpose { font-weight: 600; overflow-wrap: anywhere; }
+  .tx .what .note { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .tx .amt { font-weight: 600; font-size: 16px; text-align: right; }
+  .tx .acts { display: flex; gap: 2px; }
+  @media (max-width: 520px) {
+    .tx { grid-template-columns: 52px 1fr auto; }
+    .tx .acts { grid-column: 2 / -1; justify-content: flex-end; margin-top: -6px; }
+  }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; width: fit-content; }
+  .pill.sib { color: #fff; background: var(--c); }
+  .pill.paid { background: var(--good-soft); color: var(--good); }
+  .pill.overdue { background: var(--bad-soft); color: var(--bad); }
+  .pill.soon { background: var(--warn-soft); color: var(--warn); }
+  .pill.rec { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .rec-box { display: flex; flex-direction: column; gap: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .rec-box input, .rec-box select { background: var(--surface); }
+  .hint { margin: 0; font-size: 13px; color: var(--muted); }
+  .pill.upcoming { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+  .debt { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .debt.is-overdue { border-color: var(--bad); }
+  .debt-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .debt-top h3 { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
+  .debt-top .meta { font-size: 13px; color: var(--muted); }
+  .debt-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .debt-nums div { display: flex; flex-direction: column; }
+  .debt-nums small { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  .debt-nums span { font-weight: 600; font-size: 16px; }
+  .debt-nums .remain { color: var(--bad); }
+  .debt.done .debt-nums .remain { color: var(--good); }
+  .progress { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+  .progress div { height: 100%; background: var(--accent); }
+  .debt .note { font-size: 14px; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+  .payments { font-size: 13px; border-top: 1px dashed var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .payments .p { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .payments .p span:first-child { color: var(--muted); }
+  .pay-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; background: var(--surface-2); padding: 10px; border-radius: 8px; }
+  @media (max-width: 520px) { .pay-form { grid-template-columns: 1fr 1fr; } }
+  .tx-edit { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); box-shadow: inset 3px 0 0 var(--accent); }
+  .tx-edit input, .tx-edit textarea { background: var(--surface); }
+  .ledger > .tx-edit:last-child { border-bottom: 0; }
+  @media (max-width: 600px) { .tx-edit { padding: 12px; } .tx-edit .btns button { flex: 1; } }
+  .pay-title { grid-column: 1 / -1; font-weight: 700; font-size: 13px; }
+  .pay-form .btns { align-self: end; }
+  .p-right { display: inline-flex; align-items: center; gap: 2px; }
+
+  /* ---------- Phones ---------- */
+  @media (max-width: 600px) {
+    body { font-size: 15px; }
+    header.top { padding-top: 16px; }
+    .brand h1 { font-size: 22px; }
+    .brand p { font-size: 13px; }
+    .top-right { width: 100%; justify-content: space-between; }
+    .summary { gap: 8px; }
+    .stat { padding: 12px; }
+    .stat .value { font-size: 18px; }
+    .stat .sub { font-size: 12px; }
+    .legend { grid-template-columns: 1fr; gap: 6px; }
+    .legend .who { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+    .legend .who b { min-width: 64px; }
+    .legend .who small { margin-left: auto; }
+    .tabs { gap: 0; }
+    .tab { flex: 1; text-align: center; padding: 12px 8px; }
+    /* 16px inputs stop iPhones from zooming in on focus */
+    input, select, textarea { font-size: 16px; padding: 10px; }
+    button { min-height: 40px; }
+    button.small { min-height: 36px; padding: 6px 12px; }
+    .who-pick label { padding: 8px 14px; }
+    .list-tools { flex-direction: column; align-items: stretch; }
+    .search { max-width: none; }
+    .debt { padding: 12px; }
+    .debt-nums { gap: 6px; }
+    .debt-nums span { font-size: 14px; }
+    .debt-nums small { font-size: 11px; }
+    .payments .p { flex-wrap: wrap; row-gap: 0; }
+    .p-right { margin-left: auto; }
+    .pay-form { grid-template-columns: 1fr 1fr; }
+    .pay-form .field:has(#payAmt) { grid-column: 1 / -1; }
+    .pay-form .btns { grid-column: 1 / -1; }
+    .pay-form .btns button { flex: 1; }
+    form.card { padding: 14px; }
+    form.card .btns button { flex: 1; }
+    .month-head { padding: 8px 12px; }
+    .tx { padding: 12px; gap: 10px; }
+  }
+  @media (max-width: 360px) {
+    .summary { grid-template-columns: 1fr; }
+    .row2 { grid-template-columns: 1fr; }
+  }
+  .empty { padding: 28px 16px; text-align: center; color: var(--muted); }
+
+  .signin { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; max-width: 480px; }
+  .signin p { margin: 0; color: var(--muted); }
+
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Home Fund</h1>
+      <p>Daisy, Dinu &amp; Diju · money sent home and family debts</p>
+    </div>
+    <div class="top-right">
+      <span class="sync" id="sync"><span class="dot"></span><span id="syncText">Connecting…</span></span>
+      <button class="small" id="exportBtn" type="button">Export CSV</button>
+      <button class="small ghost" id="signOutBtn" type="button" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <div class="banner" id="localBanner" hidden>
+    <b>Local mode.</b> Entries are saved only in this browser. Add your Firebase settings at the top of the script so all three of you see the same data (see SETUP.md).
+  </div>
+
+  <section class="signin" id="signin" hidden>
+    <h2>Sign in to see the family ledger</h2>
+    <p>Use the Google account you shared with the others. Only Daisy, Dinu and Diju's accounts can open the data.</p>
+    <button class="primary" id="signInBtn" type="button">Sign in with Google</button>
+    <p id="signinErr" style="color:var(--bad)"></p>
+  </section>
+
+  <main id="app" hidden style="display:flex;flex-direction:column;gap:20px">
+    <section class="summary" aria-label="Summary">
+      <div class="stat"><span class="label">Sent home, all time</span><span class="value num" id="sTotal">–</span><span class="sub" id="sTotalSub"></span></div>
+      <div class="stat"><span class="label">Sent this month</span><span class="value num" id="sMonth">–</span><span class="sub" id="sMonthSub"></span></div>
+      <div class="stat debt"><span class="label">Debt still owed</span><span class="value num" id="sDebt">–</span><span class="sub" id="sDebtSub"></span></div>
+      <div class="stat"><span class="label">Next due</span><span class="value" id="sNext" style="font-size:18px">–</span><span class="sub" id="sNextSub"></span></div>
+    </section>
+
+    <section class="shares" aria-label="Who sent how much">
+      <div class="shares-head"><h2>Who has sent what</h2><span id="shareNote">All time</span></div>
+      <div class="bar" id="shareBar"></div>
+      <div class="legend" id="shareLegend"></div>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-transfers" aria-selected="true" data-tab="transfers">Money sent<span class="count" id="cTransfers">0</span></button>
+      <button class="tab" role="tab" id="tab-debts" aria-selected="false" data-tab="debts">Debts<span class="count" id="cDebts">0</span></button>
+    </div>
+
+    <!-- Transfers -->
+    <section class="panel" id="panel-transfers">
+      <form class="card" id="txForm" autocomplete="off">
+        <h3 id="txFormTitle">Record money sent</h3>
+        <div class="field">
+          <label>Sent by</label>
+          <div class="who-pick" id="txWho"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="txAmount">Amount (₹)</label><input id="txAmount" type="number" min="0" step="0.01" inputmode="decimal" required></div>
+          <div class="field"><label for="txDate">Date</label><input id="txDate" type="date" required></div>
+        </div>
+        <div class="field">
+          <label for="txPurpose">What it's for</label>
+          <input id="txPurpose" list="purposes" placeholder="e.g. Monthly household" required>
+          <datalist id="purposes">
+            <option value="Monthly household"></option>
+            <option value="Groceries"></option>
+            <option value="Medical"></option>
+            <option value="Electricity / water bill"></option>
+            <option value="Education / fees"></option>
+            <option value="Loan repayment"></option>
+            <option value="House repair"></option>
+            <option value="Festival / occasion"></option>
+            <option value="Emergency"></option>
+          </datalist>
+        </div>
+        <div class="field"><label for="txNote">Note (optional)</label><textarea id="txNote" placeholder="Sent via GPay to Amma, reference no., etc."></textarea></div>
+        <div class="btns">
+          <button class="primary" type="submit" id="txSubmit">Add entry</button>
+          <button type="button" id="txCancel" hidden>Cancel edit</button>
+        </div>
+      </form>
+
+      <div class="list-col">
+        <div class="list-tools">
+          <div class="filters" id="txFilters"></div>
+          <input class="search" id="txSearch" type="search" placeholder="Search purpose or note">
+        </div>
+        <div id="txList"></div>
+      </div>
+    </section>
+
+    <!-- Debts -->
+    <section class="panel" id="panel-debts" hidden>
+      <form class="card" id="dbForm" autocomplete="off">
+        <h3 id="dbFormTitle">Add a debt</h3>
+        <div class="field"><label for="dbLender">Who we owe</label><input id="dbLender" placeholder="e.g. Federal Bank, Uncle Thomas" required></div>
+        <label class="check" for="dbRecurring"><input type="checkbox" id="dbRecurring"> Repeating payment (car loan EMI, rent, chitty…)</label>
+        <div class="rec-box" id="dbRecFields" hidden>
+          <div class="row2">
+            <div class="field"><label for="dbEmi">Each payment (₹)</label><input id="dbEmi" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 12500"></div>
+            <div class="field"><label for="dbFreq">How often</label>
+              <select id="dbFreq">
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Every 3 months</option>
+                <option value="halfyearly">Every 6 months</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label for="dbCount">Number of payments</label><input id="dbCount" type="number" min="1" step="1" inputmode="numeric" placeholder="Leave blank if it has no end date"></div>
+          <p class="hint">Already partway through a loan? Put the next payment date below and the number of payments left.</p>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="dbAmount" id="dbAmountLabel">Amount owed (₹)</label><input id="dbAmount" type="number" min="0" step="0.01" inputmode="decimal" required></div>
+          <div class="field"><label for="dbDue" id="dbDueLabel">Due date</label><input id="dbDue" type="date"></div>
+        </div>
+        <div class="field"><label for="dbNote">Details (optional)</label><textarea id="dbNote" placeholder="Borrowed for roof repair, monthly EMI ₹5,000, etc."></textarea></div>
+        <div class="btns">
+          <button class="primary" type="submit" id="dbSubmit">Add debt</button>
+          <button type="button" id="dbCancel" hidden>Cancel edit</button>
+        </div>
+      </form>
+
+      <div class="list-col">
+        <div class="list-tools">
+          <div class="filters" id="dbFilters"></div>
+        </div>
+        <div id="dbList" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module">
+/* ============================================================
+   SETTINGS — paste your Firebase web app config here.
+   Leave as null to run in local (this-browser-only) mode.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyD0N-LkwG5cIVXm0ZhdgZyIthfSG_gonS4",
+  authDomain: "home-fund-f64d9.firebaseapp.com",
+  projectId: "home-fund-f64d9",
+  storageBucket: "home-fund-f64d9.firebasestorage.app",
+  messagingSenderId: "170078307149",
+  appId: "1:170078307149:web:e2f658f858d85876cded04"
+};
+
+const SIBLINGS = ["Daisy", "Dinu", "Diju"];
+const COLORS = { Daisy: "var(--daisy)", Dinu: "var(--dinu)", Diju: "var(--diju)" };
+
+const $ = (id) => document.getElementById(id);
+const fmt = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
+const money = (n) => fmt.format(Number(n) || 0).replace(/\.00$/, "");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const todayStr = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const parseDate = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const daysUntil = (s) => Math.round((parseDate(s) - parseDate(todayStr())) / 86400000);
+const niceDate = (s) => s ? parseDate(s).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2000);
+}
+function setSync(kind, text) { $("sync").className = "sync " + kind; $("syncText").textContent = text; }
+
+/* ---------------- Data store (Firebase or local) ---------------- */
+let store;
+
+function localStore() {
+  const key = (c) => "homefund." + c;
+  const subs = {};
+  const emit = (c) => (subs[c] || []).forEach((cb) => cb(lsGet(key(c), [])));
+  window.addEventListener("storage", (e) => { const c = e.key?.replace("homefund.", ""); if (subs[c]) emit(c); });
+  return {
+    subscribe(c, cb) { (subs[c] ||= []).push(cb); cb(lsGet(key(c), [])); },
+    async add(c, data) { const all = lsGet(key(c), []); all.push({ id: crypto.randomUUID(), ...data }); lsSet(key(c), all); emit(c); },
+    async update(c, id, data) { lsSet(key(c), lsGet(key(c), []).map((x) => x.id === id ? { ...x, ...data } : x)); emit(c); },
+    async remove(c, id) { lsSet(key(c), lsGet(key(c), []).filter((x) => x.id !== id)); emit(c); },
+  };
+}
+
+async function firebaseStore() {
+  const V = "10.12.2";
+  const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+  const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const au = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const app = initializeApp(firebaseConfig);
+  const db = fs.getFirestore(app);
+  const auth = au.getAuth(app);
+
+  $("signInBtn").onclick = async () => {
+    $("signinErr").textContent = "";
+    try { await au.signInWithPopup(auth, new au.GoogleAuthProvider()); }
+    catch (e) { $("signinErr").textContent = "Sign-in didn't finish: " + e.message; }
+  };
+  $("signOutBtn").onclick = () => au.signOut(auth);
+
+  const api = {
+    subscribe(c, cb) {
+      return fs.onSnapshot(fs.collection(db, c),
+        (snap) => { setSync("live", "Live · synced"); cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))); },
+        (err) => {
+          setSync("err", "Can't load data");
+          if (err.code === "permission-denied") {
+            $("app").hidden = true; $("signin").hidden = false;
+            $("signinErr").textContent = `${auth.currentUser?.email || "This account"} isn't allowed. Sign in with one of the family accounts.`;
+          }
+        });
+    },
+    add: (c, data) => fs.addDoc(fs.collection(db, c), data),
+    update: (c, id, data) => fs.updateDoc(fs.doc(db, c, id), data),
+    remove: (c, id) => fs.deleteDoc(fs.doc(db, c, id)),
+  };
+
+  let unsubs = [];
+  au.onAuthStateChanged(auth, (user) => {
+    unsubs.forEach((u) => u()); unsubs = [];
+    if (!user) {
+      $("app").hidden = true; $("signin").hidden = false; $("signOutBtn").hidden = true;
+      setSync("", "Signed out");
+      return;
+    }
+    $("signin").hidden = true; $("app").hidden = false; $("signOutBtn").hidden = false;
+    setSync("", "Syncing…");
+    clearTimeout(api._slow);
+    api._slow = setTimeout(() => {
+      if ($("syncText").textContent === "Syncing…") {
+        setSync("err", "Still connecting…");
+        toast("Can't reach the database. Check that Firestore Database is created in Firebase.");
+      }
+    }, 12000);
+    unsubs.push(api.subscribe("transfers", (d) => { state.transfers = d; render(); }));
+    unsubs.push(api.subscribe("debts", (d) => { state.debts = d; render(); }));
+  });
+  return api;
+}
+
+/* ---------------- State ---------------- */
+const state = {
+  transfers: [], debts: [],
+  tab: lsGet("homefund.ui.tab", "transfers"),
+  txFilter: "All", dbFilter: "Open", search: "",
+  editTx: null, editDb: null, payingId: null, editPay: null, confirmDel: null,
+};
+
+/* ---------------- Rendering ---------------- */
+const FREQ = {
+  monthly: { months: 1, label: "Monthly" },
+  quarterly: { months: 3, label: "Every 3 months" },
+  halfyearly: { months: 6, label: "Every 6 months" },
+  yearly: { months: 12, label: "Yearly" },
+};
+function addMonths(s, n) {
+  const [y, m, d] = s.split("-").map(Number);
+  const first = new Date(y, m - 1 + n, 1);
+  const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  const r = new Date(first.getFullYear(), first.getMonth(), Math.min(d, last));
+  return `${r.getFullYear()}-${String(r.getMonth() + 1).padStart(2, "0")}-${String(r.getDate()).padStart(2, "0")}`;
+}
+
+function debtInfo(d) {
+  const paid = (d.payments || []).reduce((s, p) => s + Number(p.amount || 0), 0);
+  const i = { paid, recurring: !!d.recurring, ongoing: false, due: d.dueDate || "", dueNow: 0, done: 0, missed: 0, perMonth: 0 };
+
+  if (d.recurring && Number(d.emi) > 0) {
+    const emi = Number(d.emi), step = (FREQ[d.freq] || FREQ.monthly).months;
+    const total = Number(d.amount) || (d.count ? emi * d.count : 0);
+    i.ongoing = !total;
+    i.total = total;
+    i.done = Math.floor((paid + 0.01) / emi);                 // installments fully paid
+    i.remaining = i.ongoing ? 0 : Math.max(0, total - paid);
+    const finished = !i.ongoing && (i.remaining <= 0 || (d.count && i.done >= d.count));
+    if (finished) i.remaining = 0;
+    i.open = i.ongoing || i.remaining > 0;
+    if (i.open && d.dueDate) {
+      i.due = addMonths(d.dueDate, i.done * step);
+      i.dueNow = emi - (paid - i.done * emi);
+      if (!i.ongoing) i.dueNow = Math.min(i.dueNow, i.remaining);
+      const today = todayStr();
+      for (let k = i.done; k < i.done + 600 && (!d.count || k < d.count); k++) {
+        if (addMonths(d.dueDate, k * step) >= today) break;
+        i.missed++;
+      }
+      i.perMonth = emi / step;
+    }
+  } else {
+    i.total = Number(d.amount || 0);
+    i.remaining = Math.max(0, i.total - paid);
+    i.open = i.remaining > 0;
+  }
+
+  let status = "upcoming", label = "No due date";
+  const what = i.recurring ? "Payment " : "";
+  if (!i.open) { status = "paid"; label = "Paid off"; }
+  else if (i.due) {
+    const n = daysUntil(i.due);
+    if (i.missed > 1) { status = "overdue"; label = `${i.missed} payments overdue`; }
+    else if (n < 0) { status = "overdue"; label = `${what}overdue by ${-n} day${n === -1 ? "" : "s"}`; }
+    else if (n === 0) { status = "overdue"; label = `${what}due today`; }
+    else if (n <= 7) { status = "soon"; label = `${what}due in ${n} day${n === 1 ? "" : "s"}`; }
+    else { label = `${what}due in ${n} days`; }
+    label = label[0].toUpperCase() + label.slice(1);
+  }
+  return { ...i, status, label };
+}
+
+function render() {
+  // Keep half-typed values in open inline forms when live updates redraw the lists
+  const kept = [...document.querySelectorAll(".tx-edit, .pay-form")].flatMap((f) =>
+    [...f.querySelectorAll("input, select, textarea")].map((el) => [el.id, el.type === "radio" ? el.checked : el.value]));
+  const focused = document.activeElement?.id;
+  renderSummary();
+  renderTransfers();
+  renderDebts();
+  kept.forEach(([id, v]) => { const el = id && $(id); if (!el) return; if (el.type === "radio") el.checked = v; else el.value = v; });
+  if (focused && kept.some(([id]) => id === focused)) $(focused)?.focus();
+  $("cTransfers").textContent = state.transfers.length;
+  $("cDebts").textContent = state.debts.filter((d) => debtInfo(d).open).length;
+}
+
+function renderSummary() {
+  const tx = state.transfers;
+  const total = tx.reduce((s, t) => s + Number(t.amount || 0), 0);
+  const month = todayStr().slice(0, 7);
+  const monthTx = tx.filter((t) => (t.date || "").startsWith(month));
+  const monthTotal = monthTx.reduce((s, t) => s + Number(t.amount || 0), 0);
+  $("sTotal").textContent = money(total);
+  $("sTotalSub").textContent = `${tx.length} transfer${tx.length === 1 ? "" : "s"}`;
+  $("sMonth").textContent = money(monthTotal);
+  $("sMonthSub").textContent = new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+
+  const open = state.debts.map((d) => ({ d, ...debtInfo(d) })).filter((x) => x.open);
+  const owed = open.reduce((s, x) => s + x.remaining, 0);
+  $("sDebt").textContent = money(owed);
+  const overdue = open.filter((x) => x.status === "overdue").length;
+  const perMonth = open.reduce((s, x) => s + x.perMonth, 0);
+  $("sDebtSub").textContent = `${open.length} open` + (overdue ? ` · ${overdue} overdue` : "") +
+    (perMonth ? ` · ${money(Math.round(perMonth))}/month repeating` : "");
+  const next = open.filter((x) => x.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+  $("sNext").textContent = next ? next.d.lender : "Nothing due";
+  $("sNextSub").textContent = next ? `${money(next.recurring ? next.dueNow : next.remaining)} · ${niceDate(next.due)} · ${next.label}` : "";
+  $("sNextSub").style.color = next && next.status === "overdue" ? "var(--bad)" : "";
+
+  const per = SIBLINGS.map((n) => ({ n, v: tx.filter((t) => t.sender === n).reduce((s, t) => s + Number(t.amount || 0), 0) }));
+  $("shareBar").innerHTML = total ? per.map((p) => `<div style="width:${(p.v / total) * 100}%;background:${COLORS[p.n]}" title="${p.n}"></div>`).join("") : "";
+  $("shareLegend").innerHTML = per.map((p) => {
+    const m = monthTx.filter((t) => t.sender === p.n).reduce((s, t) => s + Number(t.amount || 0), 0);
+    return `<div class="who"><b><i style="background:${COLORS[p.n]}"></i>${p.n}</b>
+      <span class="num">${money(p.v)}</span>
+      <small>${total ? Math.round((p.v / total) * 100) : 0}% · ${money(m)} this month</small></div>`;
+  }).join("");
+}
+
+function renderTransfers() {
+  $("txFilters").innerHTML = ["All", ...SIBLINGS].map((f) =>
+    `<button type="button" class="chip-btn" aria-pressed="${state.txFilter === f}" data-txf="${f}">${f}</button>`).join("");
+
+  const q = state.search.trim().toLowerCase();
+  const list = state.transfers
+    .filter((t) => state.txFilter === "All" || t.sender === state.txFilter)
+    .filter((t) => !q || `${t.purpose} ${t.note}`.toLowerCase().includes(q))
+    .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+
+  if (!list.length) {
+    $("txList").innerHTML = `<div class="ledger"><div class="empty">${state.transfers.length ? "No entries match this filter." : "No money sent yet. Add the first transfer using the form."}</div></div>`;
+    return;
+  }
+  const groups = {};
+  list.forEach((t) => { const k = (t.date || "").slice(0, 7); (groups[k] ||= []).push(t); });
+  $("txList").innerHTML = `<div class="ledger">` + Object.entries(groups).map(([k, items]) => {
+    const [y, m] = k.split("-").map(Number);
+    const title = new Date(y, m - 1, 1).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+    const sum = items.reduce((s, t) => s + Number(t.amount || 0), 0);
+    return `<div class="month-head"><span>${title}</span><span class="num">${money(sum)}</span></div>` +
+      items.map((t) => {
+        if (state.editTx === t.id) return txEditForm(t);
+        const d = parseDate(t.date);
+        return `<div class="tx">
+          <div class="date"><b class="num">${d.getDate()}</b>${d.toLocaleDateString("en-IN", { month: "short" })}</div>
+          <div class="what">
+            <span class="pill sib" style="--c:${COLORS[t.sender] || "var(--muted)"}">${esc(t.sender)}</span>
+            <span class="purpose">${esc(t.purpose)}</span>
+            ${t.note ? `<span class="note">${esc(t.note)}</span>` : ""}
+          </div>
+          <div class="amt num">${money(t.amount)}</div>
+          <div class="acts">
+            <button type="button" class="small ghost" data-edit-tx="${t.id}">Edit</button>
+            ${delBtn("tx:" + t.id, `data-del-tx="${t.id}"`, "Delete")}
+          </div>
+        </div>`;
+      }).join("");
+  }).join("") + `</div>`;
+}
+
+function txEditForm(t) {
+  return `<form class="tx-edit" data-tx-edit="${t.id}" autocomplete="off">
+    <div class="pay-title">Edit entry</div>
+    <div class="field"><label>Sent by</label>
+      <div class="who-pick">${SIBLINGS.map((n) =>
+        `<input type="radio" name="eTxWho" id="ewho-${n}" value="${n}" ${n === t.sender ? "checked" : ""} required><label for="ewho-${n}" style="--c:${COLORS[n]}">${n}</label>`).join("")}</div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="eTxAmount">Amount (₹)</label><input id="eTxAmount" type="number" min="0" step="0.01" inputmode="decimal" value="${t.amount}" required></div>
+      <div class="field"><label for="eTxDate">Date</label><input id="eTxDate" type="date" value="${t.date}" required></div>
+    </div>
+    <div class="field"><label for="eTxPurpose">What it's for</label><input id="eTxPurpose" list="purposes" value="${esc(t.purpose)}" required></div>
+    <div class="field"><label for="eTxNote">Note (optional)</label><textarea id="eTxNote">${esc(t.note || "")}</textarea></div>
+    <div class="btns"><button class="primary small" type="submit">Save changes</button><button class="small" type="button" data-tx-cancel>Cancel</button></div>
+  </form>`;
+}
+
+function renderDebts() {
+  const filters = ["Open", "Paid", "All"];
+  $("dbFilters").innerHTML = filters.map((f) =>
+    `<button type="button" class="chip-btn" aria-pressed="${state.dbFilter === f}" data-dbf="${f}">${f}</button>`).join("");
+
+  const order = { overdue: 0, soon: 1, upcoming: 2, paid: 3 };
+  const list = state.debts.map((d) => ({ d, ...debtInfo(d) }))
+    .filter((x) => state.dbFilter === "All" || (state.dbFilter === "Paid" ? !x.open : x.open))
+    .sort((a, b) => order[a.status] - order[b.status] || (a.due || "9999").localeCompare(b.due || "9999"));
+
+  if (!list.length) {
+    $("dbList").innerHTML = `<div class="ledger"><div class="empty">${state.debts.length ? "Nothing in this view." : "No debts recorded. Add who the family owes using the form."}</div></div>`;
+    return;
+  }
+  $("dbList").innerHTML = list.map((info) => {
+    const { d, paid, remaining, status, label, open } = info;
+    const pct = info.total ? Math.min(100, (paid / info.total) * 100) : 0;
+    const pays = (d.payments || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    let meta;
+    if (info.recurring) {
+      const freq = (FREQ[d.freq] || FREQ.monthly).label;
+      const progress = d.count ? `${Math.min(info.done, d.count)} of ${d.count} paid` : `${info.done} paid`;
+      meta = `<span class="pill rec">↻ ${freq} · ${money(d.emi)}</span> ${progress}` +
+        (open && info.due ? ` · next ${niceDate(info.due)}` : "");
+    } else {
+      meta = d.dueDate ? "Due " + niceDate(d.dueDate) : "No due date set";
+    }
+    const nums = info.ongoing
+      ? `<div><small>Each payment</small><span class="num">${money(d.emi)}</span></div>
+         <div><small>Paid so far</small><span class="num">${money(paid)}</span></div>
+         <div><small>Due now</small><span class="num remain">${money(info.dueNow)}</span></div>`
+      : `<div><small>${info.recurring ? "Total" : "Borrowed"}</small><span class="num">${money(info.total)}</span></div>
+         <div><small>Repaid</small><span class="num">${money(paid)}</span></div>
+         <div><small>Remaining</small><span class="num remain">${money(remaining)}</span></div>`;
+    return `<article class="debt ${status === "overdue" ? "is-overdue" : ""} ${!open ? "done" : ""}">
+      <div class="debt-top">
+        <div>
+          <h3>${esc(d.lender)}</h3>
+          <div class="meta">${meta}</div>
+        </div>
+        <span class="pill ${status}">${label}</span>
+      </div>
+      <div class="debt-nums">${nums}</div>
+      ${info.ongoing ? "" : `<div class="progress"><div style="width:${pct}%"></div></div>`}
+      ${d.note ? `<p class="note">${esc(d.note)}</p>` : ""}
+      ${pays.length ? `<div class="payments">${pays.map((p) => state.editPay === `${d.id}|${p.id}`
+        ? payForm(d.id, p, p.id)
+        : `<div class="p">
+          <span>${niceDate(p.date)} · paid by ${esc(p.by)}</span>
+          <span class="p-right"><span class="num">${money(p.amount)}</span>
+          <button type="button" class="small ghost" data-edit-pay="${d.id}|${p.id}">Edit</button>
+          ${delBtn(`pay:${d.id}|${p.id}`, `data-del-pay="${d.id}|${p.id}" aria-label="Remove payment"`, "×")}</span>
+        </div>`).join("")}</div>` : ""}
+      ${state.payingId === d.id ? payForm(d.id, { amount: info.recurring ? info.dueNow : remaining, by: lsGet("homefund.ui.me", ""), date: todayStr() }) : ""}
+      <div class="btns">
+        ${open && state.payingId !== d.id ? `<button type="button" class="small primary" data-pay="${d.id}">${info.recurring ? `Pay ${money(info.dueNow)}` : "Record payment"}</button>` : ""}
+        <button type="button" class="small ghost" data-edit-db="${d.id}">Edit</button>
+        ${delBtn("db:" + d.id, `data-del-db="${d.id}"`, "Delete")}
+      </div>
+    </article>`;
+  }).join("");
+}
+
+/* ---------------- Transfer form ---------------- */
+$("txWho").innerHTML = SIBLINGS.map((n) =>
+  `<input type="radio" name="txWho" id="who-${n}" value="${n}" required><label for="who-${n}" style="--c:${COLORS[n]}">${n}</label>`).join("");
+
+function resetTxForm() {
+  $("txForm").reset();
+  $("txDate").value = todayStr();
+  const me = lsGet("homefund.ui.me", "");
+  if (me) $("who-" + me).checked = true;
+  $("txFormTitle").textContent = "Record money sent";
+  $("txSubmit").textContent = "Add entry";
+  $("txCancel").hidden = true;
+}
+
+$("txForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const sender = document.querySelector('input[name="txWho"]:checked')?.value;
+  if (!sender) return toast("Pick who sent it");
+  const data = {
+    sender,
+    amount: Number($("txAmount").value),
+    date: $("txDate").value,
+    purpose: $("txPurpose").value.trim(),
+    note: $("txNote").value.trim(),
+  };
+  lsSet("homefund.ui.me", sender);
+  $("txSubmit").disabled = true;
+  try {
+    await store.add("transfers", { ...data, createdAt: Date.now() }); toast("Entry added");
+    resetTxForm();
+  } catch (err) { toast("Couldn't save: " + err.message); }
+  $("txSubmit").disabled = false;
+});
+$("txCancel").onclick = resetTxForm;
+$("txSearch").addEventListener("input", (e) => { state.search = e.target.value; renderTransfers(); });
+
+/* ---------------- Debt form ---------------- */
+function syncRecurringFields() {
+  const on = $("dbRecurring").checked;
+  $("dbRecFields").hidden = !on;
+  $("dbEmi").required = on;
+  $("dbDue").required = on;
+  $("dbAmount").required = !on;
+  $("dbAmountLabel").textContent = on ? "Total to repay (₹)" : "Amount owed (₹)";
+  $("dbAmount").placeholder = on ? "Each payment × number" : "";
+  $("dbDueLabel").textContent = on ? "Next payment date" : "Due date";
+}
+function autoTotal() {
+  if ($("dbAmount").dataset.manual) return;
+  const emi = Number($("dbEmi").value), n = Number($("dbCount").value);
+  $("dbAmount").value = emi > 0 && n > 0 ? Math.round(emi * n * 100) / 100 : "";
+}
+$("dbRecurring").addEventListener("change", syncRecurringFields);
+$("dbEmi").addEventListener("input", autoTotal);
+$("dbCount").addEventListener("input", autoTotal);
+$("dbAmount").addEventListener("input", () => { $("dbAmount").dataset.manual = $("dbAmount").value ? "1" : ""; });
+
+function resetDbForm() {
+  state.editDb = null;
+  $("dbForm").reset();
+  $("dbAmount").dataset.manual = "";
+  syncRecurringFields();
+  $("dbFormTitle").textContent = "Add a debt";
+  $("dbSubmit").textContent = "Add debt";
+  $("dbCancel").hidden = true;
+}
+$("dbForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const recurring = $("dbRecurring").checked;
+  const emi = Number($("dbEmi").value) || 0;
+  const count = Math.floor(Number($("dbCount").value)) || 0;
+  if (recurring && !(emi > 0)) return toast("Enter the amount of each payment");
+  const data = {
+    lender: $("dbLender").value.trim(),
+    amount: Number($("dbAmount").value) || (recurring && count ? emi * count : 0),
+    dueDate: $("dbDue").value || "",
+    note: $("dbNote").value.trim(),
+    recurring,
+    emi: recurring ? emi : 0,
+    freq: recurring ? $("dbFreq").value : "",
+    count: recurring ? count : 0,
+  };
+  $("dbSubmit").disabled = true;
+  try {
+    if (state.editDb) { await store.update("debts", state.editDb, data); toast("Debt updated"); }
+    else { await store.add("debts", { ...data, payments: [], createdAt: Date.now() }); toast("Debt added"); }
+    resetDbForm();
+  } catch (err) { toast("Couldn't save: " + err.message); }
+  $("dbSubmit").disabled = false;
+});
+$("dbCancel").onclick = resetDbForm;
+
+/* ---------------- Click handling ---------------- */
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const ds = b.dataset;
+
+  if (ds.tab) return setTab(ds.tab);
+  if (ds.txf) { state.txFilter = ds.txf; return renderTransfers(); }
+  if (ds.dbf) { state.dbFilter = ds.dbf; return renderDebts(); }
+
+  if (ds.editTx) {
+    state.editTx = ds.editTx; state.confirmDel = null;
+    renderTransfers();
+    $("eTxAmount")?.focus();
+    return;
+  }
+  if ("txCancel" in ds) { state.editTx = null; return renderTransfers(); }
+  if (ds.delTx) {
+    if (!armDelete("tx:" + ds.delTx)) return;
+    await runDelete(() => store.remove("transfers", ds.delTx), "Entry deleted");
+    return;
+  }
+  if (ds.editDb) {
+    const d = state.debts.find((x) => x.id === ds.editDb); if (!d) return;
+    state.editDb = d.id;
+    $("dbLender").value = d.lender; $("dbAmount").value = d.amount || ""; $("dbDue").value = d.dueDate || ""; $("dbNote").value = d.note || "";
+    $("dbRecurring").checked = !!d.recurring;
+    $("dbEmi").value = d.emi || ""; $("dbFreq").value = d.freq || "monthly"; $("dbCount").value = d.count || "";
+    $("dbAmount").dataset.manual = d.amount ? "1" : "";
+    syncRecurringFields();
+    $("dbFormTitle").textContent = "Edit debt"; $("dbSubmit").textContent = "Save changes"; $("dbCancel").hidden = false;
+    $("dbForm").scrollIntoView({ behavior: "smooth", block: "start" }); $("dbLender").focus();
+    return;
+  }
+  if (ds.delDb) {
+    if (!armDelete("db:" + ds.delDb)) return;
+    await runDelete(() => store.remove("debts", ds.delDb), "Debt deleted");
+    return;
+  }
+  if (ds.pay) { state.payingId = ds.pay; state.editPay = null; renderDebts(); $("payAmt")?.focus(); return; }
+  if (ds.editPay) { state.editPay = ds.editPay; state.payingId = null; renderDebts(); $("payAmt")?.focus(); return; }
+  if ("payCancel" in ds) { state.payingId = null; state.editPay = null; return renderDebts(); }
+  if (ds.delPay) {
+    if (!armDelete("pay:" + ds.delPay)) return;
+    const [did, pid] = ds.delPay.split("|");
+    const d = state.debts.find((x) => x.id === did);
+    if (d) await runDelete(() => store.update("debts", did, { payments: (d.payments || []).filter((p) => p.id !== pid) }), "Payment removed");
+    return;
+  }
+  if ("delKeep" in ds) { state.confirmDel = null; render(); }
+});
+
+/* Two-step delete: first tap arms the button, second tap deletes.
+   (Browser confirm() popups are blocked in some views, so we don't rely on them.) */
+function armDelete(key) {
+  if (state.confirmDel === key) { state.confirmDel = null; return true; }
+  state.confirmDel = key;
+  clearTimeout(armDelete._t);
+  armDelete._t = setTimeout(() => { if (state.confirmDel === key) { state.confirmDel = null; render(); } }, 5000);
+  render();
+  return false;
+}
+async function runDelete(fn, msg) {
+  try { await fn(); toast(msg); }
+  catch (err) { toast("Couldn't delete: " + err.message); render(); }
+}
+function delBtn(key, attr, label) {
+  if (state.confirmDel === key) {
+    return `<button type="button" class="small primary danger-fill" ${attr}>Yes, delete</button>
+      <button type="button" class="small ghost" data-del-keep>Keep</button>`;
+  }
+  return `<button type="button" class="small ghost danger" ${attr}>${label}</button>`;
+}
+
+function payForm(debtId, v, editId = "") {
+  return `<form class="pay-form" data-pay-form="${debtId}" data-pay-edit="${editId}">
+    ${editId ? `<div class="pay-title">Edit payment</div>` : ""}
+    <div class="field"><label for="payAmt">Amount (₹)</label><input id="payAmt" type="number" min="0" step="0.01" inputmode="decimal" value="${v.amount ?? ""}" required></div>
+    <div class="field"><label for="payBy">Paid by</label><select id="payBy">${[...SIBLINGS, "Home"].map((s) => `<option ${s === v.by ? "selected" : ""}>${s}</option>`).join("")}</select></div>
+    <div class="field"><label for="payDate">Date</label><input id="payDate" type="date" value="${v.date || todayStr()}" required></div>
+    <div class="btns"><button class="primary small" type="submit">${editId ? "Save changes" : "Save"}</button><button class="small" type="button" data-pay-cancel>Cancel</button></div>
+  </form>`;
+}
+
+document.addEventListener("submit", async (e) => {
+  const f = e.target.closest("[data-tx-edit]"); if (!f) return;
+  e.preventDefault();
+  const sender = f.querySelector('input[name="eTxWho"]:checked')?.value;
+  if (!sender) return toast("Pick who sent it");
+  const data = {
+    sender,
+    amount: Number($("eTxAmount").value),
+    date: $("eTxDate").value,
+    purpose: $("eTxPurpose").value.trim(),
+    note: $("eTxNote").value.trim(),
+  };
+  if (!(data.amount > 0)) return toast("Enter an amount");
+  try {
+    await store.update("transfers", f.dataset.txEdit, data);
+    state.editTx = null; toast("Entry updated"); renderTransfers();
+  } catch (err) { toast("Couldn't save: " + err.message); }
+});
+
+document.addEventListener("submit", async (e) => {
+  const f = e.target.closest("[data-pay-form]"); if (!f) return;
+  e.preventDefault();
+  const d = state.debts.find((x) => x.id === f.dataset.payForm); if (!d) return;
+  const editId = f.dataset.payEdit;
+  const p = { id: editId || crypto.randomUUID(), amount: Number($("payAmt").value), by: $("payBy").value, date: $("payDate").value };
+  if (!(p.amount > 0)) return toast("Enter an amount");
+  const payments = editId
+    ? (d.payments || []).map((x) => x.id === editId ? p : x)
+    : [...(d.payments || []), p];
+  try {
+    await store.update("debts", d.id, { payments });
+    state.payingId = null; state.editPay = null;
+    toast(editId ? "Payment updated" : "Payment recorded"); renderDebts();
+  } catch (err) { toast("Couldn't save: " + err.message); }
+});
+
+function setTab(t) {
+  state.tab = t; lsSet("homefund.ui.tab", t);
+  for (const name of ["transfers", "debts"]) {
+    $("tab-" + name).setAttribute("aria-selected", String(name === t));
+    $("panel-" + name).hidden = name !== t;
+  }
+}
+
+/* ---------------- CSV export ---------------- */
+$("exportBtn").onclick = () => {
+  const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = [["Type", "Date", "Person / Lender", "Amount", "Purpose / Status", "Note", "Due date", "Repaid", "Remaining"]];
+  state.transfers.forEach((t) => rows.push(["Sent home", t.date, t.sender, t.amount, t.purpose, t.note, "", "", ""]));
+  state.debts.forEach((d) => {
+    const i = debtInfo(d);
+    const status = d.recurring ? `${i.label} · ${(FREQ[d.freq] || FREQ.monthly).label} ${d.emi}` : i.label;
+    rows.push(["Debt", "", d.lender, i.total || "", status, d.note, i.due, i.paid, i.ongoing ? "" : i.remaining]);
+  });
+  const blob = new Blob([rows.map((r) => r.map(q).join(",")).join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `home-fund-${todayStr()}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+/* ---------------- Start ---------------- */
+setTab(state.tab);
+resetTxForm();
+if (firebaseConfig) {
+  try { store = await firebaseStore(); }
+  catch (err) { setSync("err", "Couldn't reach Firebase"); console.error(err); }
+} else {
+  store = localStore();
+  $("localBanner").hidden = false;
+  $("app").hidden = false;
+  setSync("local", "Local mode");
+  store.subscribe("transfers", (d) => { state.transfers = d; render(); });
+  store.subscribe("debts", (d) => { state.debts = d; render(); });
+}
+// Refresh "due in N days" labels after midnight
+setInterval(render, 60 * 60 * 1000);
+</script>
+</body>
+</html>
