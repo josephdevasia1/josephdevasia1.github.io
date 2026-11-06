@@ -535,6 +535,35 @@
       color: var(--green);
     }
 
+    /* ─── Writeups ──────────────────────────────────────────────── */
+    #writeups { background: var(--bg2); }
+    .writeup-card { cursor: pointer; }
+    .writeup-platform {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .writeup-badge, .writeup-diff {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 1px;
+      padding: 0.2rem 0.6rem; border-radius: 100px;
+      text-transform: uppercase;
+    }
+    .writeup-badge.htb {
+      background: rgba(159,239,0,0.1);
+      border: 1px solid rgba(159,239,0,0.35);
+      color: #9fef00;
+    }
+    .writeup-diff.easy   { background: rgba(0,255,65,0.1);  border: 1px solid rgba(0,255,65,0.35);  color: var(--green); }
+    .writeup-diff.medium { background: rgba(255,179,0,0.1); border: 1px solid rgba(255,179,0,0.4);  color: #ffb300; }
+    .writeup-diff.hard   { background: rgba(255,64,64,0.1); border: 1px solid rgba(255,64,64,0.4);  color: #ff5a5a; }
+    .writeup-read {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem; color: var(--green);
+      margin-top: 1.2rem; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .writeup-read span { transition: transform 0.3s; display: inline-block; }
+    .writeup-card:hover .writeup-read span { transform: translateX(5px); }
+
     /* ─── Certifications ────────────────────────────────────────── */
     #certifications { background: var(--bg2); }
     .certs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; }
@@ -713,6 +742,7 @@
     <li><a href="#skills">Skills</a></li>
     <li><a href="#experience">Experience</a></li>
     <li><a href="#projects">Projects</a></li>
+    <li><a href="#writeups">Writeups</a></li>
     <li><a href="#certifications">Certifications</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
@@ -1045,6 +1075,38 @@
           <span class="project-tag">Immutability</span>
         </div>
       </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── WRITEUPS ──────────────────────────────────────────────────── -->
+<section id="writeups">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">// ./writeups</div>
+      <h2 class="section-title">CTF &amp; Lab Writeups</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-grid">
+
+      <a class="project-card writeup-card fade-in" href="writeups/bedside.html">
+        <div class="writeup-platform">
+          <span class="writeup-badge htb">Hack The Box</span>
+          <span class="writeup-diff medium">Medium</span>
+        </div>
+        <div class="project-icon green">&#128737;</div>
+        <div class="project-title">Bedside &mdash; Full Chain to Root</div>
+        <div class="project-desc">A Linux box chaining unsafe deserialization across a document-processing pipeline and an AI model-training system: PDFMiner CMap pickle RCE for a foothold, directory traversal for lateral movement, and a malicious PyTorch checkpoint loaded by a root trainer for privilege escalation.</div>
+        <div class="project-tags">
+          <span class="project-tag">Insecure Deserialization</span>
+          <span class="project-tag">pdfminer.six</span>
+          <span class="project-tag">Directory Traversal</span>
+          <span class="project-tag">PyTorch / MONAI</span>
+          <span class="project-tag">Privilege Escalation</span>
+        </div>
+        <div class="writeup-read">Read writeup <span>&rarr;</span></div>
+      </a>
 
     </div>
   </div>
