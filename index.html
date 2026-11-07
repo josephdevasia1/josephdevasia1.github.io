@@ -553,8 +553,14 @@
       border: 1px solid rgba(159,239,0,0.35);
       color: #9fef00;
     }
+    .writeup-badge.research {
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.35);
+      color: var(--cyan);
+    }
     .writeup-diff.easy   { background: rgba(0,255,65,0.1);  border: 1px solid rgba(0,255,65,0.35);  color: var(--green); }
     .writeup-diff.medium { background: rgba(255,179,0,0.1); border: 1px solid rgba(255,179,0,0.4);  color: #ffb300; }
+    .writeup-diff.high   { background: rgba(255,64,64,0.1); border: 1px solid rgba(255,64,64,0.4);  color: #ff5a5a; }
     .writeup-diff.hard   { background: rgba(255,64,64,0.1); border: 1px solid rgba(255,64,64,0.4);  color: #ff5a5a; }
     .writeup-read {
       font-family: 'Share Tech Mono', monospace;
@@ -1089,6 +1095,24 @@
       <div class="section-line"></div>
     </div>
     <div class="projects-grid">
+
+      <a class="project-card writeup-card fade-in" href="writeups/mongoose-ssi.html">
+        <div class="writeup-platform">
+          <span class="writeup-badge research">Security Research</span>
+          <span class="writeup-diff high">CISA ICS Advisory</span>
+        </div>
+        <div class="project-icon cyan">&#128269;</div>
+        <div class="project-title">Mongoose SSI Path Traversal &mdash; Responsible Disclosure</div>
+        <div class="project-desc">Independent discovery of an arbitrary file-disclosure flaw in Mongoose, an embedded web server used across IoT and industrial control systems. Found via differential source review, confirmed with a PoC, and coordinated through the vendor and CISA (VU#870763) &mdash; credited by name in the published ICS advisory.</div>
+        <div class="project-tags">
+          <span class="project-tag">Path Traversal</span>
+          <span class="project-tag">Source Code Review</span>
+          <span class="project-tag">Embedded / ICS</span>
+          <span class="project-tag">CISA Coordination</span>
+          <span class="project-tag">CVSS 8.7 High</span>
+        </div>
+        <div class="writeup-read">Read writeup <span>&rarr;</span></div>
+      </a>
 
       <a class="project-card writeup-card fade-in" href="writeups/bedside.html">
         <div class="writeup-platform">

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mongoose SSI Path Traversal &mdash; Security Research | Joseph Devasia</title>
+  <meta name="description" content="Discovery, confirmation, and responsible disclosure of an SSI path-traversal arbitrary-file-disclosure flaw in Mongoose (Cesanta), coordinated through the vendor and CISA ICS (VU#870763) and credited by name in the published advisory." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23080c10'/%3E%3Cpath d='M32 6 L54 14 L54 34 C54 48 44 57 32 62 C20 57 10 48 10 34 L10 14 Z' fill='none' stroke='%2300ff41' stroke-width='2'/%3E%3Ctext x='32' y='40' font-family='Arial Black,sans-serif' font-weight='900' font-size='18' fill='%2300ff41' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:  #00ff41;
+      --cyan:   #00d4ff;
+      --purple: #7b2fff;
+      --amber:  #ffb300;
+      --red:    #ff5a5a;
+      --bg:     #080c10;
+      --bg2:    #0d1117;
+      --bg3:    #111827;
+      --card:   rgba(255,255,255,0.04);
+      --border: rgba(0,255,65,0.18);
+      --text:   #c9d1d9;
+      --muted:  #586069;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ::selection { background: var(--green); color: #000; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 4px; }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      -webkit-mask-image: radial-gradient(ellipse at top, #000 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse at top, #000 20%, transparent 75%);
+    }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: rgba(8,12,16,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; color: var(--green);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .back-link:hover { text-decoration: none; opacity: 0.8; }
+    .topbar-logo { font-family: 'Orbitron', monospace; font-weight: 700; color: #fff; font-size: 0.9rem; }
+    .topbar-logo span { color: var(--green); }
+
+    .layout {
+      position: relative; z-index: 1;
+      max-width: 1180px; margin: 0 auto;
+      display: grid; grid-template-columns: 240px 1fr;
+      gap: 2.5rem; padding: 2rem 1.5rem 6rem;
+    }
+    .toc {
+      position: sticky; top: 90px; align-self: start;
+      max-height: calc(100vh - 110px); overflow-y: auto;
+      font-size: 0.82rem;
+      border-left: 1px solid var(--border);
+      padding-left: 1rem;
+    }
+    .toc-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.8rem;
+    }
+    .toc a {
+      display: block; color: var(--muted); padding: 0.28rem 0;
+      border-left: 2px solid transparent; margin-left: -1rem; padding-left: 1rem;
+      transition: color 0.2s, border-color 0.2s;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .toc a:hover { color: var(--green); text-decoration: none; }
+    .toc a.active { color: var(--green); border-color: var(--green); }
+
+    article { min-width: 0; }
+    .wu-head { margin-bottom: 2.5rem; }
+    .wu-crumb {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; color: var(--green); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+    h1.wu-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 4.5vw, 2.6rem); font-weight: 900;
+      color: #fff; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .wu-byline { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--muted); margin-bottom: 1.2rem; }
+    .wu-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;
+      padding: 0.25rem 0.7rem; border-radius: 100px;
+    }
+    .badge.research { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.4); color: var(--cyan); }
+    .badge.high     { background: rgba(255,64,64,0.1); border: 1px solid rgba(255,64,64,0.4); color: var(--red); }
+    .badge.os       { background: rgba(123,47,255,0.1); border: 1px solid rgba(123,47,255,0.4); color: #b478ff; }
+
+    .meta-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .meta-panel-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1rem; background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+    .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+    .meta-panel-title { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-left: 0.5rem; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 1.5rem; padding: 0.8rem 1.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; }
+    .meta-row { padding: 0.4rem 0; display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dashed rgba(255,255,255,0.06); }
+    .meta-row .k { color: var(--muted); }
+    .meta-row .v { color: var(--green); text-align: right; }
+
+    /* Rendered markdown */
+    .content h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem; font-weight: 700; color: #fff;
+      margin: 3rem 0 1rem; padding-top: 1.2rem;
+      scroll-margin-top: 90px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .content h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.08rem; font-weight: 700; color: var(--cyan);
+      margin: 2rem 0 0.8rem; scroll-margin-top: 90px;
+    }
+    .content h4 { font-family: 'Share Tech Mono', monospace; color: var(--green); margin: 1.4rem 0 0.6rem; font-size: 0.95rem; }
+    .content p { margin: 0.9rem 0; }
+    .content strong { color: var(--green); font-weight: 600; }
+    .content ul, .content ol { margin: 0.9rem 0 0.9rem 1.5rem; }
+    .content li { margin: 0.4rem 0; }
+    .content hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 2.5rem 0; }
+
+    .content pre {
+      background: #0a0e13 !important;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1.2rem 0; padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .content pre::before {
+      content: '';
+      display: block; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--cyan), transparent);
+    }
+    .content pre code {
+      display: block; padding: 1rem 1.1rem; overflow-x: auto;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem; line-height: 1.7;
+      background: transparent !important;
+    }
+    .content :not(pre) > code {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.82em;
+      background: rgba(0,255,65,0.08); color: var(--green);
+      padding: 0.1rem 0.35rem; border-radius: 4px;
+    }
+
+    .content .table-wrap { overflow-x: auto; margin: 1.3rem 0; }
+    .content table {
+      width: 100%; border-collapse: collapse; font-size: 0.86rem;
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .content th, .content td { padding: 0.65rem 0.9rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .content th {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--green); background: rgba(0,255,65,0.05);
+    }
+    .content td { color: var(--text); vertical-align: top; }
+    .content tr:last-child td { border-bottom: none; }
+
+    .content blockquote {
+      border-left: 3px solid var(--cyan);
+      background: rgba(0,212,255,0.06);
+      border-radius: 0 8px 8px 0;
+      padding: 0.6rem 1.1rem; margin: 1.3rem 0;
+      color: #a9dcef; font-style: italic;
+    }
+
+    .foot {
+      margin-top: 3rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.8rem; color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .foot a { color: var(--green); }
+    .loading { color: var(--muted); font-family: 'Share Tech Mono', monospace; padding: 2rem 0; }
+
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="topbar">
+    <a class="back-link" href="../index.html#writeups">&larr; Back to portfolio</a>
+    <div class="topbar-logo">JD<span>.</span>SEC</div>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" id="toc">
+      <div class="toc-title">Contents</div>
+      <!-- auto-generated -->
+    </nav>
+
+    <article>
+      <header class="wu-head">
+        <div class="wu-crumb">// security research &bull; responsible disclosure</div>
+        <h1 class="wu-title">Mongoose SSI Path Traversal</h1>
+        <div class="wu-byline">Joseph Devasia &middot; University of North Texas &middot; 2026</div>
+        <div class="wu-badges">
+          <span class="badge research">Security Research</span>
+          <span class="badge high">CVSS v4 8.7 &mdash; High</span>
+          <span class="badge os">Mongoose / C</span>
+        </div>
+        <div class="meta-panel">
+          <div class="meta-panel-bar">
+            <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+            <span class="meta-panel-title">disclosure.meta</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-row"><span class="k">Target</span><span class="v">Mongoose (Cesanta)</span></div>
+            <div class="meta-row"><span class="k">Vuln class</span><span class="v">SSI Path Traversal</span></div>
+            <div class="meta-row"><span class="k">Impact</span><span class="v">Arbitrary file read</span></div>
+            <div class="meta-row"><span class="k">Undetected for</span><span class="v">5+ years</span></div>
+            <div class="meta-row"><span class="k">Fixed in</span><span class="v">Mongoose 7.22</span></div>
+            <div class="meta-row"><span class="k">CISA case</span><span class="v">VU#870763</span></div>
+            <div class="meta-row"><span class="k">CVSS v3.1 / v4</span><span class="v">7.5 / 8.7 (High)</span></div>
+            <div class="meta-row"><span class="k">Credit</span><span class="v">Named in advisory</span></div>
+          </div>
+        </div>
+      </header>
+
+      <div id="content" class="content"><div class="loading">// rendering writeup&hellip;</div></div>
+
+      <div class="foot">
+        <p>Independent security research conducted through responsible disclosure with the vendor (Cesanta) and CISA's Industrial Control Systems division. All testing was performed against a local, researcher-controlled Mongoose build.</p>
+        <p style="margin-top:0.8rem"><a href="../index.html#writeups">&larr; Back to all writeups</a></p>
+      </div>
+    </article>
+  </div>
+
+  <!-- ─── Writeup source (Markdown) ─────────────────────────────── -->
+  <script id="md" type="text/markdown">
+## Executive Summary
+
+This writeup documents the discovery, confirmation, and responsible disclosure of a **path traversal vulnerability in Mongoose**, an embedded web server library used in IoT devices, industrial controllers, and critical infrastructure worldwide. The vulnerability allowed an attacker to read arbitrary files from a server's filesystem by abusing Mongoose's Server Side Includes (SSI) processor, and had gone undetected for more than five years.
+
+The finding was independently discovered through manual source code review, confirmed with a working proof of concept, and disclosed to the vendor (Cesanta) through a proper responsible disclosure process. Cesanta patched the issue within three weeks, and the fix shipped in **Mongoose 7.22**. The case was escalated to CISA's Industrial Control Systems division for coordinated disclosure (Case **VU#870763**), resulting in a published CISA ICS advisory that credits this research by name.
+
+No CVE number was ultimately assigned to this finding. This writeup explains why, and makes the case for why the discovery still matters regardless.
+
+## Background
+
+Mongoose is a small, widely embedded C web server library. It ships as a single amalgamated source file and is used by hundreds of hardware and software vendors to add a web interface to routers, IP cameras, industrial controllers, and other embedded devices. Because it is compiled directly into firmware, a vulnerability in Mongoose does not just affect one product — it potentially affects every device built on top of it.
+
+One of Mongoose's optional features is Server Side Includes (SSI): a templating mechanism that lets a `.shtml` file instruct the server to splice in the contents of another file before sending the page to a browser. A typical SSI directive looks like this:
+
+```html
+<!--#include file="header.html"-->
+```
+
+When Mongoose serves a `.shtml` file, it scans for these directives, opens the referenced file, and inserts its contents into the response. This feature has existed in Mongoose since January 2021.
+
+## Discovery Methodology
+
+The discovery followed a **comparative security audit** approach: rather than scanning for isolated bugs, the methodology looked for inconsistencies in how the same codebase applied its own security protections across similar code paths.
+
+The process was as follows:
+
+1. **Static analysis** — running `cppcheck` across the Mongoose source to surface candidate leads.
+2. **Git history analysis** — searching commit history for prior security-relevant fixes, which often reveal where a codebase's authors have previously made mistakes.
+3. **Cross-path comparison** — Mongoose's git history showed multiple commits hardening path traversal protection in its HTTP request handler (`http.c`), via a function called `mg_path_is_sane()`. This raised a natural question: had that same protection been applied everywhere files are opened from user-influenced input?
+4. **Manual code review** — tracing every call site of `mg_path_is_sane()` showed it was used in exactly two places: the HTTP request handler and the file upload handler. It was never called inside the SSI processor (`mg_ssi()` in `src/ssi.c`).
+5. **Dynamic confirmation** — building a minimal Mongoose server with SSI enabled and testing the hypothesis directly against real HTTP requests.
+
+## Technical Root Cause
+
+The vulnerable function, `mg_ssi()`, builds a file path directly from untrusted SSI directive content with no validation:
+
+```c
+// file= directive — no sanitization:
+mg_snprintf(tmp, sizeof(tmp), "%.*s%s",
+            (int)(p - path), path, arg);
+mg_ssi(tmp, root, depth + 1);  // opens whatever file arg points to
+
+// root parameter — explicitly discarded:
+(void) root;  // never used to enforce a filesystem boundary
+```
+
+The `root` parameter, representing the configured web root, is passed into the function on every recursive call but is explicitly voided at the end — a clear signal that the developer was aware it was unused, rather than a silent oversight. No equivalent of `mg_path_is_sane()` was ever added to this code path.
+
+This meant that an SSI directive such as:
+
+```html
+<!--#include file="../../../../../etc/passwd"-->
+```
+
+would cause Mongoose to resolve the path up through the filesystem and return the full contents of `/etc/passwd` — or any other file the server process could read — directly in the HTTP response.
+
+## Proof of Concept
+
+The vulnerability was confirmed on Kali Linux using a minimal Mongoose test server with SSI enabled. Two tests were run side by side to isolate the bug precisely:
+
+**Control — direct HTTP path traversal (correctly blocked):**
+
+```text
+GET /../../../etc/passwd   →   404 Not Found
+```
+
+**Exploit — SSI include path traversal (succeeded):**
+
+```text
+GET /traversal.shtml
+    →   returns full contents of /etc/passwd
+```
+
+The same server, the same web root, and the same underlying filesystem produced two different outcomes depending on which code path handled the request. This contrast was the clearest possible demonstration that the vulnerability was a **missing protection in one specific function**, not a systemic misconfiguration.
+
+## Responsible Disclosure Timeline
+
+| Date | Event |
+|---|---|
+| April 28, 2026 | Vulnerability reported to Cesanta (`support@cesanta.com`) with full technical write-up and PoC |
+| May 19, 2026 | Cesanta released a patched build and requested confirmation |
+| May 19, 2026 | Fix confirmed: both `file=` and `virtual=` traversal vectors blocked |
+| May 21, 2026 | CISA Industrial Control Systems division opened coordinated disclosure Case VU#870763 |
+| May 28, 2026 | CISA shared a draft advisory crediting the researcher by name |
+| July 2026 | Mongoose 7.22 released, including the fix; CISA ICS advisory published |
+
+## Vendor Response and Fix
+
+Cesanta's fix added exactly the missing validation, applied symmetrically to both SSI include directives:
+
+```c
+if (!mg_path_is_sane(mg_str(tmp))) {
+    MG_ERROR(("SSI include path traversal blocked: %s", arg));
+} else {
+    mg_ssi(tmp, root, depth + 1);
+}
+```
+
+This is the same function already protecting the HTTP request handler, now extended to cover the SSI processor. Confirmation testing against the patched build showed both `file=` and `virtual=` traversal attempts correctly blocked and logged, with no change to legitimate SSI functionality.
+
+## CISA ICS Coordinated Disclosure
+
+Because Mongoose is deployed across critical manufacturing and industrial control environments worldwide, CERT/CC routed the case to CISA's Industrial Control Systems division. CISA independently reviewed the source code, corresponded with Cesanta to confirm the fix, and prepared a public advisory. The published advisory's **Section 3.4 — Researcher** reads:
+
+> "Joseph Devasia reported this vulnerability to CISA."
+
+The advisory assigned a **CVSS v3.1 base score of 7.5 (High)** and a **CVSS v4 score of 8.7 (High)**, reflecting unauthenticated, network-exploitable arbitrary file disclosure with low attack complexity.
+
+## CVE Eligibility: Why No CVE Was Assigned
+
+Despite the vendor-confirmed fix and the CISA ICS advisory, no CVE identifier was ultimately assigned to this finding. The determination rested on **CNA Rule 4.1.3**, which states:
+
+> "Well-documented or commonly understood non-default configuration or runtime changes made by an authorized user SHOULD NOT be determined to be Vulnerabilities."
+
+The SSI feature is controlled by the `MG_ENABLE_SSI` compile-time flag, which defaults to `0` in Mongoose's `src/config.h`. A developer must explicitly enable SSI support, and the CISA coordinator determined that this non-default configuration requirement placed the finding outside strict CVE eligibility criteria, even though the underlying code defect was real and the vendor treated it as worth fixing.
+
+This is an important and often misunderstood distinction in vulnerability research: **CVE eligibility and security relevance are not the same thing.** A defect can be real, exploitable, and worth patching without meeting the specific administrative criteria a CNA uses to assign a tracking number.
+
+## Why This Still Matters
+
+Several things are independently true, regardless of CVE status:
+
+- **The vulnerability was real.** It was confirmed with a working, reproducible proof of concept showing unauthenticated arbitrary file disclosure.
+- **The vendor treated it as a genuine security defect.** Cesanta did not dismiss the report — they shipped a fix within three weeks, using the exact remediation suggested in the original disclosure.
+- **A U.S. federal agency validated the finding.** CISA's Industrial Control Systems division independently reviewed the source code and corresponded with the vendor before publishing a public advisory — a level of scrutiny far beyond a typical bug report.
+- **The finding was novel.** A review of Mongoose's complete CVE history shows no prior report of SSI path traversal; every previous Mongoose CVE involved TLS, WebSocket, or protocol-parsing bugs. This was a different vulnerability class in a part of the codebase that had never previously been security-reviewed, and it had survived five years of use in production software without detection.
+- **The fix protects real deployments.** Mongoose 7.22 ships the patch to every downstream user of the library, independent of whether a CVE number exists.
+- **The disclosure process itself is the credential.** A documented, vendor-confirmed, CISA-coordinated disclosure — complete with a named mention in a federal advisory — is a stronger evidentiary record than a CVE number alone would be. CVE numbers are retrospective trivia lookups; the advisory and correspondence are primary evidence of the work.
+
+In short: the CVE number is an administrative label assigned under a specific set of eligibility rules. It is not the thing that makes a finding valuable. The finding here was validated independently by the vendor who fixed it and by a federal coordinating body who published it — that is the substance of the result.
+
+## Lessons Learned
+
+1. **Security checks are not transitively applied.** A protection added to one code path (`mg_path_is_sane()` in the HTTP handler) does not automatically propagate to a structurally similar code path (the SSI processor) that was added separately. Differential analysis across code paths that perform the same category of operation — here, opening a file from user-influenced input — is a reliable way to surface this class of bug.
+2. **Compile-time feature flags create a CVE eligibility gray zone.** A defect inside a non-default feature can be completely real and still fall outside strict CVE criteria. Researchers should understand this distinction before assuming a vendor-confirmed, vendor-patched bug automatically qualifies for a CVE.
+3. **Vendor and government validation can stand in for a CVE number.** Documented correspondence with a vendor, plus a coordinated disclosure case with a national CERT or CISA, constitutes a credible and verifiable record of a finding's legitimacy — independent of whether MITRE or a CNA ultimately assigns a number.
+
+## Conclusion
+
+This research began as a manual security audit of a widely deployed embedded web server and ended in a vendor-confirmed fix and a published CISA Industrial Control Systems advisory. The absence of a CVE number reflects a specific administrative rule about non-default configuration, not a judgment on the finding's validity or severity. The vulnerability was real, it was independently discovered, it was responsibly disclosed, it was fixed, and it is now documented in a federal government advisory under the researcher's own name. That is the outcome that matters.
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    (function () {
+      var src = document.getElementById('md').textContent;
+      var contentEl = document.getElementById('content');
+
+      function slugify(t) {
+        return t.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      if (!window.marked) {
+        contentEl.innerHTML = '<p class="loading">Could not load the Markdown renderer.</p>';
+        return;
+      }
+
+      marked.setOptions({ gfm: true, breaks: false });
+      contentEl.innerHTML = marked.parse(src);
+
+      contentEl.querySelectorAll('table').forEach(function (tbl) {
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        tbl.parentNode.insertBefore(wrap, tbl);
+        wrap.appendChild(tbl);
+      });
+
+      if (window.hljs) {
+        contentEl.querySelectorAll('pre code').forEach(function (block) {
+          try { hljs.highlightElement(block); } catch (e) {}
+        });
+      }
+
+      var toc = document.getElementById('toc');
+      var headings = contentEl.querySelectorAll('h2');
+      var tocLinks = [];
+      headings.forEach(function (h) {
+        if (!h.id) h.id = slugify(h.textContent);
+        var a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        toc.appendChild(a);
+        tocLinks.push(a);
+      });
+
+      var spy = function () {
+        var pos = window.scrollY + 120;
+        var current = null;
+        headings.forEach(function (h) {
+          if (h.offsetTop <= pos) current = h.id;
+        });
+        tocLinks.forEach(function (a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+        });
+      };
+      window.addEventListener('scroll', spy, { passive: true });
+      spy();
+    })();
+  </script>
+</body>
+</html>
