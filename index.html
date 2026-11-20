@@ -1096,6 +1096,24 @@
     </div>
     <div class="projects-grid">
 
+      <a class="project-card writeup-card fade-in" href="writeups/libumqtt-cve-2026-125132.html">
+        <div class="writeup-platform">
+          <span class="writeup-badge research">CVE-2026-125132</span>
+          <span class="writeup-diff high">CISA Advisory</span>
+        </div>
+        <div class="project-icon green">&#128137;</div>
+        <div class="project-title">libumqtt Integer Underflow &mdash; CVE-2026-125132</div>
+        <div class="project-desc">Integer-underflow flaw in the MQTT PUBLISH parser of libumqtt: a malicious broker can supply a topic length exceeding the packet's remaining length, producing an underflowed payload length and out-of-bounds pointer. Found via source review, validated with ASan, and disclosed through CISA (VU#800316) &mdash; published as CVE-2026-125132, CVSS 8.8 High.</div>
+        <div class="project-tags">
+          <span class="project-tag">CWE-191 Integer Underflow</span>
+          <span class="project-tag">MQTT / IoT</span>
+          <span class="project-tag">Source Code Review</span>
+          <span class="project-tag">AddressSanitizer</span>
+          <span class="project-tag">CVSS 8.8 High</span>
+        </div>
+        <div class="writeup-read">Read writeup <span>&rarr;</span></div>
+      </a>
+
       <a class="project-card writeup-card fade-in" href="writeups/mongoose-ssi.html">
         <div class="writeup-platform">
           <span class="writeup-badge research">Security Research</span>
